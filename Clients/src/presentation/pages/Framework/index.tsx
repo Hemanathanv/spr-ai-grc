@@ -218,37 +218,11 @@ const Framework = () => {
       const frameworkId = Number(framework.id);
       const isAssignedToProject = projectFrameworkIds.includes(frameworkId);
       const isNotEuAiAct = !framework.name.toLowerCase().includes("eu ai act");
-      const isComplianceFramework =
-        framework.name.toLowerCase().includes("iso 27001") ||
-        framework.name.toLowerCase().includes("iso 42001") ||
-        framework.name.toLowerCase().includes("nist ai rmf");
 
-      return isAssignedToProject && isNotEuAiAct && isComplianceFramework;
+      return isAssignedToProject && isNotEuAiAct;
     });
 
-    // Sort to ensure ISO 42001 appears first, then ISO 27001, then NIST AI RMF
-    return filtered.sort((a, b) => {
-      const aIsISO42001 = a.name.toLowerCase().includes("iso 42001");
-      const bIsISO42001 = b.name.toLowerCase().includes("iso 42001");
-      const aIsISO27001 = a.name.toLowerCase().includes("iso 27001");
-      const bIsISO27001 = b.name.toLowerCase().includes("iso 27001");
-      const aIsNISTAI_RMF = a.name.toLowerCase().includes("nist ai rmf");
-      const bIsNISTAI_RMF = b.name.toLowerCase().includes("nist ai rmf");
-
-      // ISO 42001 comes first
-      if (aIsISO42001 && !bIsISO42001) return -1;
-      if (!aIsISO42001 && bIsISO42001) return 1;
-
-      // ISO 27001 comes second
-      if (aIsISO27001 && !bIsISO27001 && !bIsNISTAI_RMF) return -1;
-      if (!aIsISO27001 && bIsISO27001 && !aIsNISTAI_RMF) return 1;
-
-      // NIST AI RMF comes third
-      if (aIsNISTAI_RMF && !bIsNISTAI_RMF) return -1;
-      if (!aIsNISTAI_RMF && bIsNISTAI_RMF) return 1;
-
-      return 0;
-    });
+    return filtered;
   }, [allFrameworks, organizationalProject]);
 
   // Helper function to get projectFrameworkId for a given framework

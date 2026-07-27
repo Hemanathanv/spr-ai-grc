@@ -72,10 +72,12 @@ async function seedBankAIGRCData() {
 
     // 2. Configure Users
     const hashedPassword = await bcrypt.hash("ChangeMe!Str0ng", SALT_ROUNDS);
+    const demoHashedPassword = await bcrypt.hash("Verifywise#1", SALT_ROUNDS);
     const usersData = [
-      { name: "VerifyWise", surname: "Admin", email: "admin@verifywise.com", roleId: 1 },
-      { name: "CISO", surname: "ChiefInfoSecOfficer", email: "ciso@abcbank.com", roleId: 1 },
-      { name: "CRO", surname: "ChiefRiskOfficer", email: "cro@abcbank.com", roleId: 1 },
+      { name: "VerifyWise", surname: "Admin", email: "admin@verifywise.com", password: hashedPassword, roleId: 1 },
+      { name: "Demo", surname: "User", email: "verifywise@email.com", password: demoHashedPassword, roleId: 1 },
+      { name: "CISO", surname: "ChiefInfoSecOfficer", email: "ciso@abcbank.com", password: hashedPassword, roleId: 1 },
+      { name: "CRO", surname: "ChiefRiskOfficer", email: "cro@abcbank.com", password: hashedPassword, roleId: 1 },
     ];
 
     let primaryUserId = 1;
@@ -209,10 +211,10 @@ async function seedBankAIGRCData() {
       const fwIds = ucId === "UC-BANK-ORG" ? [10, 11, 12, 13, 14, 2, 3, 4] : [15, 1];
       for (const fwId of fwIds) {
         await sequelize.query(
-          `INSERT INTO verifywise.projects_frameworks (framework_id, project_id, is_demo)
-           VALUES (:fwId, :pId, false)
-           ON CONFLICT DO NOTHING`,
-          { replacements: { fwId, pId }, transaction }
+          `INSERT INTO verifywise.projects_frameworks (organization_id, framework_id, project_id, is_demo)
+           VALUES (:orgId, :fwId, :pId, false)
+           ON CONFLICT (project_id, framework_id) DO UPDATE SET organization_id = :orgId`,
+          { replacements: { orgId, fwId, pId }, transaction }
         );
       }
     }
