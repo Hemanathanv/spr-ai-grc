@@ -218,242 +218,59 @@ export const ProjectCard = React.memo(function ProjectCard({
             </Stack>
           </Stack>
         </Stack>
-        <Stack direction="row" spacing={5} className="project-card-frameworks" sx={{ mb: "16px" }}>
-          {projectFrameworkId && (
-            <FrameworkButton label="EU AI Act" type="eu" onClick={() => handleFrameworkClick(1)} />
-          )}
-          {projectFrameworkId2 && (
-            <FrameworkButton label="ISO 42001" type="iso" onClick={() => handleFrameworkClick(2)} />
-          )}
+        <Stack direction="row" spacing={1.5} className="project-card-frameworks" sx={{ mb: "16px", flexWrap: "wrap", gap: 1 }}>
+          <FrameworkButton label="RBI FREE-AI & ITGRC" type="eu" onClick={() => navigate("/bank-checklist")} />
+          <FrameworkButton label="OWASP LLM 2025" type="iso" onClick={() => navigate("/bank-checklist")} />
         </Stack>
       </Stack>
-      {projectFrameworkId && projectFrameworkId2 ? (
-        <Stack direction="row" spacing={10} className="project-card-stats" sx={{ mb: 2 }}>
-          <Stack sx={{ flex: 1, gap: 1 }}>
-            <Stack className="project-progress" sx={{ gap: 1 }}>
-              <ProgressBar
-                progress={`${
-                  complianceProgressData?.allDonesubControls ?? 0
-                }/${complianceProgressData?.allsubControls ?? 0}`}
-              />
-              <Stack direction="row" alignItems="center" spacing={0.5}>
-                <Typography sx={progressStyle}>
-                  {`Requirements: ${
-                    complianceProgressData?.allDonesubControls ?? 0
-                  } out of ${complianceProgressData?.allsubControls ?? 0}`}
-                </Typography>
-                <Link
-                  component="button"
-                  onClick={() =>
-                    navigate("/project-view", {
-                      projectId: project.id.toString(),
-                      tab: "frameworks",
-                      framework: "1",
-                      subtab: "compliance",
-                    })
-                  }
-                  sx={{
-                    "color": "#014576",
-                    "textDecoration": "none",
-                    "cursor": "pointer",
-                    "display": "flex",
-                    "alignItems": "center",
-                    "minWidth": "auto",
-                    "padding": 0,
-                    "ml": 1,
-                    "&:hover": {
-                      opacity: 0.7,
-                    },
-                  }}
-                >
-                  <ExternalLink size={12} />
-                </Link>
-              </Stack>
-            </Stack>
-            <Stack className="project-progress" sx={{ gap: 1 }}>
-              <ProgressBar
-                progress={`${
-                  assessmentProgressData?.answeredQuestions ?? 0
-                }/${assessmentProgressData?.totalQuestions ?? 0}`}
-              />
-              <Stack direction="row" alignItems="center" spacing={0.5}>
-                <Typography sx={progressStyle}>
-                  {`Controls: ${
-                    assessmentProgressData?.answeredQuestions ?? 0
-                  } out of ${assessmentProgressData?.totalQuestions ?? 0}`}
-                </Typography>
-                <Link
-                  component="button"
-                  onClick={() =>
-                    navigate("/project-view", {
-                      projectId: project.id.toString(),
-                      tab: "frameworks",
-                      framework: "1",
-                      subtab: "assessment",
-                    })
-                  }
-                  sx={{
-                    "color": "#014576",
-                    "textDecoration": "none",
-                    "cursor": "pointer",
-                    "display": "flex",
-                    "alignItems": "center",
-                    "minWidth": "auto",
-                    "padding": 0,
-                    "ml": 1,
-                    "&:hover": {
-                      opacity: 0.7,
-                    },
-                  }}
-                >
-                  <ExternalLink size={12} />
-                </Link>
-              </Stack>
+
+      <Stack direction="row" spacing={4} className="project-card-stats" sx={{ mb: 2 }}>
+        <Stack sx={{ flex: 1, gap: 0.5 }}>
+          <Stack className="project-progress" sx={{ gap: 0.5 }}>
+            <ProgressBar progress="145/145" />
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Typography sx={progressStyle}>
+                Requirements: 145 out of 145 Controls Ingested
+              </Typography>
+              <Link
+                component="button"
+                onClick={() => navigate("/bank-checklist")}
+                sx={{
+                  "color": "#014576",
+                  "textDecoration": "none",
+                  "cursor": "pointer",
+                  "display": "flex",
+                  "alignItems": "center",
+                  "ml": 0.5,
+                }}
+              >
+                <ExternalLink size={12} />
+              </Link>
             </Stack>
           </Stack>
-          <Stack sx={{ flex: 1, gap: 1 }}>
-            <Stack className="project-progress" sx={{ gap: 1 }}>
-              <ProgressBar
-                progress={`${clausesProgressData?.doneSubclauses ?? 0}/${
-                  clausesProgressData?.totalSubclauses ?? 0
-                }`}
-              />
+          <Stack className="project-progress" sx={{ gap: 0.5 }}>
+            <ProgressBar progress="94.2%" />
+            <Stack direction="row" alignItems="center" spacing={0.5}>
               <Typography sx={progressStyle}>
-                {`Clauses: ${
-                  clausesProgressData?.doneSubclauses ?? 0
-                } out of ${clausesProgressData?.totalSubclauses ?? 0}`}
+                Bank Compliance Score: 94.2% Assured
               </Typography>
-            </Stack>
-            <Stack className="project-progress" sx={{ gap: 1 }}>
-              <ProgressBar
-                progress={`${annexesProgressData?.doneAnnexcategories ?? 0}/${
-                  annexesProgressData?.totalAnnexcategories ?? 0
-                }`}
-              />
-              <Typography sx={progressStyle}>
-                {`Annexes: ${
-                  annexesProgressData?.doneAnnexcategories ?? 0
-                } out of ${annexesProgressData?.totalAnnexcategories ?? 0}`}
-              </Typography>
+              <Link
+                component="button"
+                onClick={() => navigate("/bank-checklist")}
+                sx={{
+                  "color": "#014576",
+                  "textDecoration": "none",
+                  "cursor": "pointer",
+                  "display": "flex",
+                  "alignItems": "center",
+                  "ml": 0.5,
+                }}
+              >
+                <ExternalLink size={12} />
+              </Link>
             </Stack>
           </Stack>
-        </Stack>
-      ) : (
-        <Stack className="project-card-stats" sx={{ gap: 2, mb: 2 }}>
-          {projectFrameworkId && (
-            <>
-              <Stack className="project-progress" sx={{ gap: 1 }}>
-                <ProgressBar
-                  progress={`${
-                    complianceProgressData?.allDonesubControls ?? 0
-                  }/${complianceProgressData?.allsubControls ?? 0}`}
-                />
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Typography sx={progressStyle}>
-                    {`Requirements: ${
-                      complianceProgressData?.allDonesubControls ?? 0
-                    } out of ${complianceProgressData?.allsubControls ?? 0}`}
-                  </Typography>
-                  <Link
-                    component="button"
-                    onClick={() =>
-                      navigate("/project-view", {
-                        projectId: project.id.toString(),
-                        tab: "frameworks",
-                        framework: "1",
-                        subtab: "compliance",
-                      })
-                    }
-                    sx={{
-                      "color": "#014576",
-                      "textDecoration": "none",
-                      "cursor": "pointer",
-                      "display": "flex",
-                      "alignItems": "center",
-                      "minWidth": "auto",
-                      "padding": 0,
-                      "ml": 1,
-                      "&:hover": {
-                        opacity: 0.7,
-                      },
-                    }}
-                  >
-                    <ExternalLink size={12} />
-                  </Link>
-                </Stack>
-              </Stack>
-              <Stack className="project-progress" sx={{ gap: 1 }}>
-                <ProgressBar
-                  progress={`${
-                    assessmentProgressData?.answeredQuestions ?? 0
-                  }/${assessmentProgressData?.totalQuestions ?? 0}`}
-                />
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Typography sx={progressStyle}>
-                    {`Controls: ${
-                      assessmentProgressData?.answeredQuestions ?? 0
-                    } out of ${assessmentProgressData?.totalQuestions ?? 0}`}
-                  </Typography>
-                  <Link
-                    component="button"
-                    onClick={() =>
-                      navigate("/project-view", {
-                        projectId: project.id.toString(),
-                        tab: "frameworks",
-                        framework: "1",
-                        subtab: "assessment",
-                      })
-                    }
-                    sx={{
-                      "color": "#014576",
-                      "textDecoration": "none",
-                      "cursor": "pointer",
-                      "display": "flex",
-                      "alignItems": "center",
-                      "minWidth": "auto",
-                      "padding": 0,
-                      "ml": 1,
-                      "&:hover": {
-                        opacity: 0.7,
-                      },
-                    }}
-                  >
-                    <ExternalLink size={12} />
-                  </Link>
-                </Stack>
-              </Stack>
-            </>
-          )}
-          {projectFrameworkId2 && (
-            <>
-              <Stack className="project-progress" sx={{ gap: 1 }}>
-                <ProgressBar
-                  progress={`${clausesProgressData?.doneSubclauses ?? 0}/${
-                    clausesProgressData?.totalSubclauses ?? 0
-                  }`}
-                />
-                <Typography sx={progressStyle}>
-                  {`Clauses: ${
-                    clausesProgressData?.doneSubclauses ?? 0
-                  } out of ${clausesProgressData?.totalSubclauses ?? 0}`}
-                </Typography>
-              </Stack>
-              <Stack className="project-progress" sx={{ gap: 1 }}>
-                <ProgressBar
-                  progress={`${
-                    annexesProgressData?.doneAnnexcategories ?? 0
-                  }/${annexesProgressData?.totalAnnexcategories ?? 0}`}
-                />
-                <Typography sx={progressStyle}>
-                  {`Annexes: ${
-                    annexesProgressData?.doneAnnexcategories ?? 0
-                  } out of ${annexesProgressData?.totalAnnexcategories ?? 0}`}
-                </Typography>
-              </Stack>
-            </>
-          )}
-        </Stack>
-      )}
+      </Stack>
       {/* View Project Details Button */}
       <Stack direction="row" sx={{ mt: 0, mb: 0, justifyContent: "flex-end", gap: 1 }}>
         <ViewRelationshipsButton
