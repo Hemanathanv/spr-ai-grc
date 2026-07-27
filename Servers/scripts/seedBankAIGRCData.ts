@@ -8,7 +8,7 @@ const SALT_ROUNDS = 10;
 
 async function seedBankAIGRCData() {
   console.log(`\n==================================================`);
-  console.log(`Starting Seeding for Bank AI-GRC System: ${ORG_NAME}...`);
+  console.log(`Starting Comprehensive Seeding for Bank AI-GRC System: ${ORG_NAME}...`);
   console.log(`==================================================\n`);
 
   const transaction = await sequelize.transaction();
@@ -16,7 +16,7 @@ async function seedBankAIGRCData() {
   try {
     await sequelize.query(`SET search_path TO verifywise, public;`, { transaction });
 
-    // 0. Ensure controls and control_categories tables exist
+    // 0. Ensure tables exist
     await sequelize.query(
       `CREATE TABLE IF NOT EXISTS verifywise.control_categories (
          id SERIAL PRIMARY KEY,
@@ -58,7 +58,7 @@ async function seedBankAIGRCData() {
     let orgId: number;
     if ((existingOrgs as any[]).length > 0) {
       orgId = (existingOrgs as any[])[0].id;
-      console.log(`✓ Found existing Organization "${ORG_NAME}" with ID: ${orgId}`);
+      console.log(`✓ Found Organization "${ORG_NAME}" (ID: ${orgId})`);
     } else {
       const [newOrg] = await sequelize.query(
         `INSERT INTO verifywise.organizations (name, onboarding_status, created_at, updated_at)
@@ -67,7 +67,7 @@ async function seedBankAIGRCData() {
         { replacements: { name: ORG_NAME }, transaction }
       );
       orgId = (newOrg as any[])[0].id;
-      console.log(`✓ Created Organization "${ORG_NAME}" with ID: ${orgId}`);
+      console.log(`✓ Created Organization "${ORG_NAME}" (ID: ${orgId})`);
     }
 
     // 2. Configure Users
@@ -78,6 +78,7 @@ async function seedBankAIGRCData() {
       { name: "Demo", surname: "User", email: "verifywise@email.com", password: demoHashedPassword, roleId: 1 },
       { name: "CISO", surname: "ChiefInfoSecOfficer", email: "ciso@abcbank.com", password: hashedPassword, roleId: 1 },
       { name: "CRO", surname: "ChiefRiskOfficer", email: "cro@abcbank.com", password: hashedPassword, roleId: 1 },
+      { name: "LeadAuditor", surname: "ISAuditDirector", email: "auditor@abcbank.com", password: hashedPassword, roleId: 1 },
     ];
 
     let primaryUserId = 1;
@@ -103,9 +104,9 @@ async function seedBankAIGRCData() {
         primaryUserId = (userRes as any[])[0].id;
       }
     }
-    console.log(`✓ Configured Users for ${ORG_NAME} (Primary Admin User ID: ${primaryUserId})`);
+    console.log(`✓ Configured Enterprise Users (Primary User ID: ${primaryUserId})`);
 
-    // 3. Configure Frameworks
+    // 3. Configure Banking Frameworks
     const bankFrameworks = [
       { id: 10, name: "RBI FREE-AI & ITGRC", isOrg: true },
       { id: 11, name: "CERT-In AI Guidelines", isOrg: true },
@@ -125,7 +126,7 @@ async function seedBankAIGRCData() {
     }
     console.log(`✓ Configured 6 Banking Frameworks`);
 
-    // 4. Create Use Cases / Projects
+    // 4. Create In-Scope Banking Projects
     const projectsData = [
       {
         ucId: "UC-BANK-001",
@@ -204,30 +205,16 @@ async function seedBankAIGRCData() {
       );
       projectMap[proj.ucId] = (pRes as any[])[0].id;
     }
-    console.log(`✓ Configured 5 In-Scope Banking Projects/Use Cases`);
+    console.log(`✓ Configured 5 Banking Projects/Use Cases`);
 
-    // 5. Link Frameworks to Projects
-    for (const [ucId, pId] of Object.entries(projectMap)) {
-      const fwIds = ucId === "UC-BANK-ORG" ? [10, 11, 12, 13, 14, 2, 3, 4] : [15, 1];
-      for (const fwId of fwIds) {
-        await sequelize.query(
-          `INSERT INTO verifywise.projects_frameworks (organization_id, framework_id, project_id, is_demo)
-           VALUES (:orgId, :fwId, :pId, false)
-           ON CONFLICT (project_id, framework_id) DO UPDATE SET organization_id = :orgId`,
-          { replacements: { orgId, fwId, pId }, transaction }
-        );
-      }
-    }
-    console.log(`✓ Linked Frameworks to Bank Projects`);
-
-    // 6. Ingest 145+ Controls from extracted JSON
+    // 5. Ingest 145+ Controls
     const jsonPath = path.join(__dirname, "../../shared/bank_controls_extracted.json");
     if (!fs.existsSync(jsonPath)) {
       throw new Error(`Controls extracted file not found at ${jsonPath}`);
     }
 
     const rawControls = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-    console.log(`Found ${rawControls.length} controls extracted from Excel sheets.`);
+    console.log(`Found ${rawControls.length} controls extracted from Excel baseline.`);
 
     const categoriesSet = new Set<string>();
     rawControls.forEach((c: any) => categoriesSet.add(c.domain || "General Governance"));
@@ -277,9 +264,211 @@ async function seedBankAIGRCData() {
       );
       insertedCount++;
     }
-    console.log(`✓ Ingested ${insertedCount} Controls with Audit Working Paper fields into Database`);
+    console.log(`✓ Ingested ${insertedCount} Controls with Audit Working Papers into Database`);
 
-    // 7. Insert Model Inventories
+    // 6. Seed Demo Risk Assessment Entries based on exact control names
+    const demoRisks = [
+      {
+        ref: "RSK-FAIR-01",
+        title: "Disparate Impact & Credit Discrimination Risk (FAIR-01)",
+        desc: "Risk that CreditRisk-XGBoost-v2.1 exhibits demographic bias across protected credit applicant attributes.",
+        likelihood: 2,
+        impact: 4,
+        tier: "High",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-OWSP-01",
+        title: "Prompt Injection & System Prompt Jailbreak (OWSP-01)",
+        desc: "Vulnerability where adversarial user prompts bypass safety filters in CustomerBot-LLM-v3.0.",
+        likelihood: 3,
+        impact: 5,
+        tier: "Critical",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-AIBOM-01",
+        title: "Unverified Model Dependencies & SBOM Vulnerability (AIBOM-01)",
+        desc: "Risk of unvetted open-source ML packages contaminated with CVE vulnerabilities.",
+        likelihood: 2,
+        impact: 4,
+        tier: "High",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-REGF-01",
+        title: "RBI FREE-AI Board Governance Oversight Non-Compliance (REGF-01)",
+        desc: "Lack of quarterly Board Risk Committee sign-off on AI/ML risk exposure limits.",
+        likelihood: 2,
+        impact: 4,
+        tier: "High",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-PRIV-01",
+        title: "DPDP Act Customer PII Exposure in Fine-Tuning Data (PRIV-01)",
+        desc: "Risk of unmasked customer personal identifiers entering training datasets.",
+        likelihood: 2,
+        impact: 5,
+        tier: "Critical",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-GATE-01",
+        title: "AI Gateway Firewall Bypass & Rate Limit Abuse (GATE-01)",
+        desc: "Risk of unauthenticated high-volume API calls exhausting LLM endpoint tokens.",
+        likelihood: 2,
+        impact: 3,
+        tier: "Medium",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-HALU-01",
+        title: "Financial Product Misinformation & Hallucination Risk (HALU-01)",
+        desc: "Conversational bot presenting incorrect loan interest rates or bank fee structures.",
+        likelihood: 3,
+        impact: 4,
+        tier: "High",
+        strategy: "Mitigate",
+      },
+      {
+        ref: "RSK-QNTM-01",
+        title: "Post-Quantum Cryptographic API Exposure (QNTM-01)",
+        desc: "Legacy TLS 1.2 encryption vulnerable to quantum computing decryption.",
+        likelihood: 1,
+        impact: 4,
+        tier: "Medium",
+        strategy: "Accept",
+      },
+    ];
+
+    const mainProjectId = projectMap["UC-BANK-001"] || 1;
+    for (const r of demoRisks) {
+      await sequelize.query(
+        `INSERT INTO verifywise.risks (
+           organization_id, project_id, risk_ref, title, description,
+           likelihood, impact, inherent_score, residual_score, status, risk_tier, treatment_strategy,
+           owner_id, created_at, updated_at
+         )
+         VALUES (
+           :orgId, :pId, :ref, :title, :desc,
+           :l, :i, :score, :resScore, 'Open', :tier, :strategy,
+           :userId, NOW(), NOW()
+         )
+         ON CONFLICT DO NOTHING`,
+        {
+          replacements: {
+            orgId,
+            pId: mainProjectId,
+            ref: r.ref,
+            title: r.title,
+            desc: r.desc,
+            l: r.likelihood,
+            i: r.impact,
+            score: r.likelihood * r.impact,
+            resScore: Math.max(1, r.likelihood * r.impact - 4),
+            tier: r.tier,
+            strategy: r.strategy,
+            userId: primaryUserId,
+          },
+          transaction,
+        }
+      );
+    }
+    console.log(`✓ Seeded ${demoRisks.length} Risk Assessment items linked to exact control references`);
+
+    // 7. Seed Demo Tasks based on control names
+    const demoTasks = [
+      {
+        title: "Complete Pre-Deployment Bias Audit Sign-Off for CreditRisk-XGBoost-v2.1 (FAIR-01)",
+        desc: "Perform disparate impact ratio calculations across protected customer attributes.",
+        priority: "high",
+        status: "open",
+      },
+      {
+        title: "Verify AI Gateway Input/Output Filter Rules for CustomerBot-LLM-v3.0 (GATE-01)",
+        desc: "Ensure prompt regex filters and PII redactors are active on port 8000.",
+        priority: "critical",
+        status: "open",
+      },
+      {
+        title: "Conduct OWASP LLM 2025 Penetration Test on SOC-AnomalyDetector-v4.0 (OWSP-01)",
+        desc: "Test for indirect prompt injection and model denial of service.",
+        priority: "high",
+        status: "open",
+      },
+      {
+        title: "Submit RBI FREE-AI Board Compliance Sign-Off Briefing Note (REGF-01)",
+        desc: "Prepare quarterly AI Governance summary report for the Board Risk Committee.",
+        priority: "high",
+        status: "open",
+      },
+      {
+        title: "Audit DPDP Act 2023 Consent & PII Anonymization Logs (PRIV-01)",
+        desc: "Verify data privacy masking before retraining LLM models.",
+        priority: "medium",
+        status: "open",
+      },
+    ];
+
+    for (const t of demoTasks) {
+      await sequelize.query(
+        `INSERT INTO verifywise.tasks (
+           organization_id, project_id, title, description, priority, status, created_by, assigned_to, created_at, updated_at
+         )
+         VALUES (
+           :orgId, :pId, :title, :desc, :priority, :status, :userId, :userId, NOW(), NOW()
+         )
+         ON CONFLICT DO NOTHING`,
+        {
+          replacements: {
+            orgId,
+            pId: mainProjectId,
+            title: t.title,
+            desc: t.desc,
+            priority: t.priority,
+            status: t.status,
+            userId: primaryUserId,
+          },
+          transaction,
+        }
+      );
+    }
+    console.log(`✓ Seeded ${demoTasks.length} Auditor Action Tasks linked to exact control names`);
+
+    // 8. Seed Audit Evidences
+    const demoEvidences = [
+      { name: "WP-FAIR-01-2026_PreDeployment_Bias_Test_Report.pdf", path: "/uploads/evidence/WP-FAIR-01-2026.pdf", size: 2450000 },
+      { name: "WP-OWSP-01-2026_Prompt_Jailbreak_PenTest_Results.pdf", path: "/uploads/evidence/WP-OWSP-01-2026.pdf", size: 1820000 },
+      { name: "WP-AIBOM-01-2026_Model_Lineage_and_SBOM_Attestation.json", path: "/uploads/evidence/WP-AIBOM-01-2026.json", size: 420000 },
+      { name: "WP-REGF-01-2026_RBI_FREE_AI_Board_Approval_Note.pdf", path: "/uploads/evidence/WP-REGF-01-2026.pdf", size: 3100000 },
+      { name: "WP-PRIV-01-2026_DPDP_Data_Protection_Impact_Assessment.pdf", path: "/uploads/evidence/WP-PRIV-01-2026.pdf", size: 2900000 },
+    ];
+
+    for (const ev of demoEvidences) {
+      await sequelize.query(
+        `INSERT INTO verifywise.file_uploads (
+           organization_id, original_name, storage_path, mime_type, file_size, uploaded_by, created_at, updated_at
+         )
+         VALUES (
+           :orgId, :name, :path, 'application/pdf', :size, :userId, NOW(), NOW()
+         )
+         ON CONFLICT DO NOTHING`,
+        {
+          replacements: {
+            orgId,
+            name: ev.name,
+            path: ev.path,
+            size: ev.size,
+            userId: primaryUserId,
+          },
+          transaction,
+        }
+      );
+    }
+    console.log(`✓ Seeded ${demoEvidences.length} Audit Evidence File Attachments`);
+
+    // 9. Seed Model Inventories
     const modelsData = [
       { name: "CreditRisk-XGBoost-v2.1", tier: "1", provider: "Internal Banking ML Engine", model: "XGBoost Classifier" },
       { name: "FraudNet-BERT-v1.4", tier: "1", provider: "Internal Fraud Intelligence", model: "BERT Transformer" },
@@ -301,7 +490,7 @@ async function seedBankAIGRCData() {
     }
     console.log(`✓ Ingested ${modelsData.length} Model Inventory entries`);
 
-    // 8. Insert Vendors
+    // 10. Seed Vendors
     const vendorsData = [
       { name: "Microsoft Azure AI Services", sensitivity: "Financial data", criticality: "High (critical to core services or products)" },
       { name: "OpenAI Enterprise", sensitivity: "Personally identifiable information (PII)", criticality: "High (critical to core services or products)" },
@@ -328,7 +517,7 @@ async function seedBankAIGRCData() {
 
     await transaction.commit();
     console.log(`\n==================================================`);
-    console.log(`🎉 SUCCESS: All 145+ Bank AI-GRC controls & frameworks seeded into PostgreSQL!`);
+    console.log(`🎉 SUCCESS: Seeded complete demo data for 145+ controls, risks, tasks, & working paper evidences!`);
     console.log(`==================================================\n`);
   } catch (err) {
     await transaction.rollback();
