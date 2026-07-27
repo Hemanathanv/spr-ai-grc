@@ -16,6 +16,15 @@ export type Control = {
   numberOfSubcontrols?: number;
   numberOfDoneSubcontrols?: number;
   subControls?: Subcontrol[];
+  /** Working Paper & Audit Testing fields */
+  wp_ref?: string;
+  test_procedure?: string;
+  pass_fail_criteria?: string;
+  sample_size?: string;
+  control_nature?: string;
+  control_type?: string;
+  testing_periodicity?: string;
+  auditor_remarks?: string;
   /** @deprecated Control-level risks removed. Use subcontrol-level risks instead. */
   risks?: number[];
 };
