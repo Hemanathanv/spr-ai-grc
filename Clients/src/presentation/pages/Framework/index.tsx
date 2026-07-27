@@ -60,6 +60,7 @@ import NISTAIRMFManage from "./NIST-AI-RMF/Manage";
 import { brand } from "../../themes/palette";
 import GovernanceIntelligenceContextBar from "../../components/GovernanceOS/GovernanceIntelligenceContextBar";
 import { storageService } from "../../../infrastructure/storage";
+import FrameworkControlsViewer from "./FrameworkControlsViewer";
 
 // Tab styles following ProjectFrameworks pattern
 const tabStyle = {
@@ -738,32 +739,8 @@ const Framework = () => {
       );
     }
 
-    // Default content for other frameworks
-    return (
-      <Box
-        sx={{
-          p: 6,
-          backgroundColor: "text.black",
-          borderRadius: 3,
-          minHeight: "400px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            color: "background.main",
-            textAlign: "center",
-            maxWidth: "600px",
-          }}
-        >
-          This is a dummy content space for {framework.name}. The actual framework content will be
-          implemented here.
-        </Typography>
-      </Box>
-    );
+    // Framework content populated from Excel controls baseline
+    return <FrameworkControlsViewer frameworkName={framework.name} />;
   };
 
   return (

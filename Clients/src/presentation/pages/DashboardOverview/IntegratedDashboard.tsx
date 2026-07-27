@@ -224,6 +224,19 @@ const IntegratedDashboard: React.FC = () => {
     setShowOrgNameModal(false);
   };
 
+  const taskRadarData = useMemo(() => {
+    if (
+      dashboard?.task_radar &&
+      (dashboard.task_radar.overdue > 0 || dashboard.task_radar.due > 0 || dashboard.task_radar.upcoming > 0)
+    ) {
+      return dashboard.task_radar;
+    }
+    if (taskMetrics?.task_radar) {
+      return taskMetrics.task_radar;
+    }
+    return dashboard?.task_radar || { overdue: 0, due: 0, upcoming: 0 };
+  }, [dashboard, taskMetrics]);
+
   // Get use cases (projects) for table
   const useCases = useMemo(() => {
     if (!dashboard?.projects_list) return [];
@@ -897,9 +910,9 @@ const IntegratedDashboard: React.FC = () => {
                   }}
                 >
                   <TaskRadarCard
-                    overdue={dashboard?.task_radar?.overdue || 0}
-                    due={dashboard?.task_radar?.due || 0}
-                    upcoming={dashboard?.task_radar?.upcoming || 0}
+                    overdue={taskRadarData.overdue}
+                    due={taskRadarData.due}
+                    upcoming={taskRadarData.upcoming}
                   />
                   <DashboardCard title="Evidence coverage" navigateTo="/file-manager">
                     {evidenceHubMetrics ? (
@@ -938,9 +951,9 @@ const IntegratedDashboard: React.FC = () => {
                   }}
                 >
                   <TaskRadarCard
-                    overdue={dashboard?.task_radar?.overdue || 0}
-                    due={dashboard?.task_radar?.due || 0}
-                    upcoming={dashboard?.task_radar?.upcoming || 0}
+                    overdue={taskRadarData.overdue}
+                    due={taskRadarData.due}
+                    upcoming={taskRadarData.upcoming}
                   />
                   <DashboardCard title="Incident status" navigateTo="/ai-incident-managements">
                     {incidentStatusMetrics && incidentStatusMetrics.total > 0 ? (

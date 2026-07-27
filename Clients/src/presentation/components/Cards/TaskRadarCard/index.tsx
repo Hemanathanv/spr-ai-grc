@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Typography } from "@mui/material";
+import { Stack, Typography, Box } from "@mui/material";
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -79,29 +79,31 @@ export function TaskRadarCard({ overdue, due, upcoming }: TaskRadarCardProps) {
       </Stack>
 
       <ChartOutlineWrapper>
-        <ResponsiveContainer width="100%" height={130} minWidth={0}>
-          <BarChart data={chartData} margin={{ top: 8, right: 0, bottom: 0, left: -24 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={borderPalette.light} vertical={false} />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 11, fill: text.icon }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 10, fill: text.tertiary }}
-              tickLine={false}
-              axisLine={false}
-              allowDecimals={false}
-            />
-            <Tooltip contentStyle={vwTooltipStyle} />
-            <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
-              {chartData.map((entry) => (
-                <Cell key={entry.name} fill={BAR_COLORS[entry.name]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <Box sx={{ width: "100%", height: 130 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 8, right: 0, bottom: 0, left: -24 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={borderPalette.light} vertical={false} />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 11, fill: text.icon }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: text.tertiary }}
+                tickLine={false}
+                axisLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip contentStyle={vwTooltipStyle} />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                {chartData.map((entry) => (
+                  <Cell key={entry.name} fill={BAR_COLORS[entry.name]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
       </ChartOutlineWrapper>
     </Stack>
   );

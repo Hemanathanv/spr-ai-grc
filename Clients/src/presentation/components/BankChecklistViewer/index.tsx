@@ -34,9 +34,14 @@ import {
   CheckCircle2,
   Lock,
   Zap,
+  Shield,
+  AlertTriangle,
+  Layers,
 } from "lucide-react";
-import bankControlsData from "../../../../../shared/bank_controls_extracted.json";
+import bankControlsData from "../../assets/bank_controls_extracted.json";
 import { brand, status as statusPalette, border as borderPalette, background, text as textColors, risk as riskPalette } from "../../themes/palette";
+import { DashboardHeaderCard } from "../Cards/DashboardHeaderCard";
+import { DashboardCard } from "../Cards/DashboardCard";
 
 export interface BankControl {
   track: string;
@@ -82,10 +87,6 @@ const getRiskStyle = (rating: string) => {
   }
 };
 
-import { DashboardHeaderCard } from "../Cards/DashboardHeaderCard";
-import { DashboardCard } from "../Cards/DashboardCard";
-import { Shield, AlertTriangle, Lock, Layers } from "lucide-react";
-
 export const BankChecklistViewer: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -100,9 +101,10 @@ export const BankChecklistViewer: React.FC = () => {
 
   // Map internal track names to clean tab indices
   const getControlsForTab = (tabIdx: number) => {
-    if (tabIdx === 1) return allControls.filter((c) => c.track === "AI Governance Control Testing");
-    if (tabIdx === 2) return allControls.filter((c) => c.track === "AI Security, Governance & Ops");
-    if (tabIdx === 3) return allControls.filter((c) => c.track === "Regulatory Compilance");
+    if (!Array.isArray(allControls)) return [];
+    if (tabIdx === 1) return allControls.filter((c) => (c.track || "").includes("AI Governance") || (c.track || "").includes("Risk"));
+    if (tabIdx === 2) return allControls.filter((c) => (c.track || "").includes("Security") || (c.track || "").includes("Guardrails"));
+    if (tabIdx === 3) return allControls.filter((c) => (c.track || "").includes("Regulatory") || (c.track || "").includes("Compliance"));
     return allControls;
   };
 
@@ -114,24 +116,24 @@ export const BankChecklistViewer: React.FC = () => {
       const term = searchTerm.toLowerCase();
       list = list.filter(
         (c) =>
-          c.ctrl_ref.toLowerCase().includes(term) ||
-          c.wp_ref.toLowerCase().includes(term) ||
-          c.objective.toLowerCase().includes(term) ||
-          c.domain.toLowerCase().includes(term) ||
-          c.description.toLowerCase().includes(term)
+          (c.ctrl_ref || "").toLowerCase().includes(term) ||
+          (c.wp_ref || "").toLowerCase().includes(term) ||
+          (c.objective || "").toLowerCase().includes(term) ||
+          (c.domain || "").toLowerCase().includes(term) ||
+          (c.description || "").toLowerCase().includes(term)
       );
     }
 
     if (selectedDomain !== "all") {
-      list = list.filter((c) => c.domain === selectedDomain);
+      list = list.filter((c) => (c.domain || "") === selectedDomain);
     }
 
     if (selectedRisk !== "all") {
-      list = list.filter((c) => c.risk_rating.toLowerCase() === selectedRisk.toLowerCase());
+      list = list.filter((c) => (c.risk_rating || "").toLowerCase() === selectedRisk.toLowerCase());
     }
 
     if (selectedNature !== "all") {
-      list = list.filter((c) => c.control_nature.toLowerCase() === selectedNature.toLowerCase());
+      list = list.filter((c) => (c.control_nature || "").toLowerCase() === selectedNature.toLowerCase());
     }
 
     return list;
@@ -140,23 +142,38 @@ export const BankChecklistViewer: React.FC = () => {
   // Unique domains for active tab
   const availableDomains = useMemo(() => {
     const trackControls = getControlsForTab(activeTab);
-    return Array.from(new Set(trackControls.map((c) => c.domain))).sort();
+    return Array.from(new Set(trackControls.map((c) => c.domain || "General").filter(Boolean))).sort();
   }, [allControls, activeTab]);
 
   // Metrics calculation for Audit Dashboard tab
   const stats = useMemo(() => {
-    const total = allControls.length;
-    const highCritical = allControls.filter(
-      (c) => c.risk_rating.toLowerCase() === "high" || c.risk_rating.toLowerCase() === "critical"
+    const safeControls = Array.isArray(allControls) ? allControls : [];
+    const total = safeControls.length;
+    const highCritical = safeControls.filter(
+      (c) =>
+        (c.risk_rating || "").toLowerCase() === "high" ||
+        (c.risk_rating || "").toLowerCase() === "critical"
     ).length;
-    const preventive = allControls.filter((c) => c.control_nature.toLowerCase().includes("preventive")).length;
-    const detective = allControls.filter((c) => c.control_nature.toLowerCase().includes("detective")).length;
-    const corrective = allControls.filter((c) => c.control_nature.toLowerCase().includes("corrective")).length;
+    const preventive = safeControls.filter((c) =>
+      (c.control_nature || "").toLowerCase().includes("preventive")
+    ).length;
+    const detective = safeControls.filter((c) =>
+      (c.control_nature || "").toLowerCase().includes("detective")
+    ).length;
+    const corrective = safeControls.filter((c) =>
+      (c.control_nature || "").toLowerCase().includes("corrective")
+    ).length;
 
     const counts = {
-      riskControls: allControls.filter((c) => c.track === "AI Governance Control Testing").length,
-      securityOps: allControls.filter((c) => c.track === "AI Security, Governance & Ops").length,
-      compliance: allControls.filter((c) => c.track === "Regulatory Compilance").length,
+      riskControls: safeControls.filter(
+        (c) => (c.track || "").includes("AI Governance") || (c.track || "").includes("Risk")
+      ).length,
+      securityOps: safeControls.filter(
+        (c) => (c.track || "").includes("Security") || (c.track || "").includes("Guardrails")
+      ).length,
+      compliance: safeControls.filter(
+        (c) => (c.track || "").includes("Regulatory") || (c.track || "").includes("Compliance")
+      ).length,
     };
 
     return { total, highCritical, preventive, detective, corrective, counts };

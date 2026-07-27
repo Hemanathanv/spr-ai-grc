@@ -816,15 +816,40 @@ export const useDashboardMetrics = () => {
     }
   }, [trainingMetrics]);
 
-  // Fetch task metrics - for Recent Activity
+  // Fetch task metrics - for Recent Activity & Task Radar fallback
   const fetchTaskMetrics = useCallback(async () => {
     try {
       const response = await getAllEntities({ routeUrl: "/tasks" });
       const tasksData = response.data || response;
       const tasksArray = Array.isArray(tasksData) ? tasksData : [];
 
+      let overdue = 0;
+      let due = 0;
+      let upcoming = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const sevenDays = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      tasksArray.forEach((task: any) => {
+        if (task.status === "Completed" || task.status === "Deleted") return;
+        if (!task.due_date) {
+          upcoming++;
+          return;
+        }
+        const dueDate = new Date(task.due_date);
+        dueDate.setHours(0, 0, 0, 0);
+        if (dueDate < today) {
+          overdue++;
+        } else if (dueDate <= sevenDays) {
+          due++;
+        } else {
+          upcoming++;
+        }
+      });
+
       const metrics = {
         total: tasksArray.length,
+        task_radar: { overdue, due, upcoming },
         recent: tasksArray
           .filter((task: any) => task.created_at || task.createdAt)
           .slice(0, 5)
@@ -1176,11 +1201,6 @@ export const useDashboardMetrics = () => {
   // Grouped into 5 sequential stages for progress tracking
   const fetchAllMetrics = useCallback(
     async (forceRefresh = false) => {
-      // If we have fresh cache and not forcing refresh, skip fetch
-      if (!forceRefresh && shouldSkipFetch()) {
-        return;
-      }
-
       // Check if we have any cached data to show immediately
       const hasAnyCache = getCache() && Object.keys(getCache()).length > 0;
 
