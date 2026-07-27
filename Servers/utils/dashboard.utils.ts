@@ -67,7 +67,8 @@ export const getDashboardDataQuery = async (
     // Overdue: tasks where due_date < today and status is not 'Completed' or 'Deleted'
     const overdueTasks = (await sequelize.query(
       `SELECT COUNT(*) FROM tasks
-       WHERE due_date < CURRENT_DATE
+       WHERE due_date IS NOT NULL
+       AND due_date < CURRENT_DATE
        AND status NOT IN ('Completed', 'Deleted')
        AND organization_id = :organizationId`,
       { replacements: { organizationId } },
@@ -85,10 +86,10 @@ export const getDashboardDataQuery = async (
     )) as [{ count: string }[], number];
     dashboard.task_radar.due = parseInt(dueSoonTasks[0][0].count);
 
-    // Upcoming: tasks where due_date is more than 7 days from now
+    // Upcoming: tasks where due_date is more than 7 days from now OR due_date is NULL
     const upcomingTasks = (await sequelize.query(
       `SELECT COUNT(*) FROM tasks
-       WHERE due_date > CURRENT_DATE + INTERVAL '7 days'
+       WHERE (due_date > CURRENT_DATE + INTERVAL '7 days' OR due_date IS NULL)
        AND status NOT IN ('Completed', 'Deleted')
        AND organization_id = :organizationId`,
       { replacements: { organizationId } },

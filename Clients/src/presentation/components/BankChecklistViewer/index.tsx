@@ -82,6 +82,10 @@ const getRiskStyle = (rating: string) => {
   }
 };
 
+import { DashboardHeaderCard } from "../Cards/DashboardHeaderCard";
+import { DashboardCard } from "../Cards/DashboardCard";
+import { Shield, AlertTriangle, Lock, Layers } from "lucide-react";
+
 export const BankChecklistViewer: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -231,194 +235,91 @@ export const BankChecklistViewer: React.FC = () => {
       {/* Tab 0: Audit Dashboard */}
       {activeTab === 0 && (
         <Stack spacing={3}>
-          {/* Executive Dashboard Cards matching native app styling */}
-          <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                }}
-              >
-                <CardContent sx={{ p: 2.5 }}>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
-                    TOTAL AUDIT CONTROLS
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 800, color: brand.primary, my: 1 }}>
-                    {stats.total}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: statusPalette.success.text, fontWeight: 600 }}>
-                    100% Ingested & Working Paper Ready
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+          {/* Executive Dashboard Header Cards identical to Main Dashboard */}
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "16px",
+              "& > *": {
+                flex: "1 1 0",
+                minWidth: "180px",
+              },
+            }}
+          >
+            <DashboardHeaderCard
+              title="Audit controls"
+              count={stats.total}
+              icon={<Shield size={18} />}
+            />
+            <DashboardHeaderCard
+              title="High & critical risks"
+              count={stats.highCritical}
+              icon={<AlertTriangle size={18} />}
+            />
+            <DashboardHeaderCard
+              title="Preventive controls"
+              count={stats.preventive}
+              icon={<Layers size={18} />}
+            />
+            <DashboardHeaderCard
+              title="Audit assurance"
+              count="94.2%"
+              icon={<Lock size={18} />}
+            />
+          </Box>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                }}
+          {/* Core Feature Area Cards matching Main Dashboard grid */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "16px",
+              mb: "16px",
+            }}
+          >
+            <DashboardCard title="AI Risk & Control Testing">
+              <Typography variant="body2" sx={{ color: textColors.secondary, mb: 2 }}>
+                79 controls covering Fairness, Transparency, Explainability, Accountability, Data Privacy & AIBOM Lineage.
+              </Typography>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setActiveTab(1)}
+                sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
               >
-                <CardContent sx={{ p: 2.5 }}>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
-                    HIGH & CRITICAL RISK CONTROLS
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 800, color: riskPalette.critical.text, my: 1 }}>
-                    {stats.highCritical}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: textColors.secondary }}>
-                    Priority Testing Scope ({Math.round((stats.highCritical / stats.total) * 100)}% of total)
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                Explore Controls ({stats.counts.riskControls}) →
+              </Button>
+            </DashboardCard>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                }}
+            <DashboardCard title="AI Security & Guardrails">
+              <Typography variant="body2" sx={{ color: textColors.secondary, mb: 2 }}>
+                49 controls covering OWASP LLM 2025, AI Gateways, SIEM Threat Intel, Output Hallucinations & Quantum-Safe Encryption.
+              </Typography>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setActiveTab(2)}
+                sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
               >
-                <CardContent sx={{ p: 2.5 }}>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
-                    CONTROL NATURE BREAKDOWN
-                  </Typography>
-                  <Stack spacing={0.5} sx={{ mt: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: textColors.primary }}>
-                      Preventive: <b>{stats.preventive}</b> | Detective: <b>{stats.detective}</b>
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: textColors.secondary }}>
-                      Corrective: <b>{stats.corrective}</b>
-                    </Typography>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
+                Explore Controls ({stats.counts.securityOps}) →
+              </Button>
+            </DashboardCard>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                }}
+            <DashboardCard title="Framework Compliance">
+              <Typography variant="body2" sx={{ color: textColors.secondary, mb: 2 }}>
+                17 controls covering RBI FREE-AI, CERT-In Blueprint CIGU-2026-0002, SEBI CSCRF, DPDP Act 2023 & IndiaAI Mission.
+              </Typography>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setActiveTab(3)}
+                sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
               >
-                <CardContent sx={{ p: 2.5 }}>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
-                    AUDIT COMPLIANCE ASSURANCE
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 800, color: statusPalette.success.text, my: 1 }}>
-                    94.2%
-                  </Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={94.2}
-                    sx={{ height: 6, borderRadius: 3, backgroundColor: statusPalette.success.bg }}
-                  />
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Core Feature Area Cards */}
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                  height: "100%",
-                }}
-              >
-                <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: textColors.primary }}>
-                    AI Risk & Control Testing
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: textColors.secondary, mb: 3, flexGrow: 1 }}>
-                    79 controls covering Fairness, Transparency, Explainability, Accountability, Data Privacy & AIBOM Lineage.
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => setActiveTab(1)}
-                    sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
-                  >
-                    Explore Controls ({stats.counts.riskControls}) →
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                  height: "100%",
-                }}
-              >
-                <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: textColors.primary }}>
-                    AI Security & Guardrails
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: textColors.secondary, mb: 3, flexGrow: 1 }}>
-                    49 controls covering OWASP LLM 2025, AI Gateways, SIEM Threat Intel, Output Hallucinations & Quantum-Safe Encryption.
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => setActiveTab(2)}
-                    sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
-                  >
-                    Explore Controls ({stats.counts.securityOps}) →
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: `1px solid ${borderPalette.dark}`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
-                  height: "100%",
-                }}
-              >
-                <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: textColors.primary }}>
-                    Framework Compliance
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: textColors.secondary, mb: 3, flexGrow: 1 }}>
-                    17 controls covering RBI FREE-AI, CERT-In Blueprint CIGU-2026-0002, SEBI CSCRF, DPDP Act 2023 & IndiaAI Mission.
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => setActiveTab(3)}
-                    sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
-                  >
-                    Explore Controls ({stats.counts.compliance}) →
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+                Explore Controls ({stats.counts.compliance}) →
+              </Button>
+            </DashboardCard>
+          </Box>
         </Stack>
       )}
 

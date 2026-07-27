@@ -337,32 +337,47 @@ async function seedBankAIGRCData() {
       {
         title: "Complete Pre-Deployment Bias Audit Sign-Off for CreditRisk-XGBoost-v2.1 (FAIR-01)",
         desc: "Perform disparate impact ratio calculations across protected customer attributes.",
+        daysOffset: -3, // Overdue
+        priority: "HIGH",
+        status: "OPEN",
       },
       {
         title: "Verify AI Gateway Input/Output Filter Rules for CustomerBot-LLM-v3.0 (GATE-01)",
         desc: "Ensure prompt regex filters and PII redactors are active on port 8000.",
+        daysOffset: 2, // Due soon
+        priority: "HIGH",
+        status: "IN_PROGRESS",
       },
       {
         title: "Conduct OWASP LLM 2025 Penetration Test on SOC-AnomalyDetector-v4.0 (OWSP-01)",
         desc: "Test for indirect prompt injection and model denial of service.",
+        daysOffset: 4, // Due soon
+        priority: "MEDIUM",
+        status: "OPEN",
       },
       {
         title: "Submit RBI FREE-AI Board Compliance Sign-Off Briefing Note (REGF-01)",
         desc: "Prepare quarterly AI Governance summary report for the Board Risk Committee.",
+        daysOffset: 10, // Upcoming
+        priority: "HIGH",
+        status: "OPEN",
       },
       {
         title: "Audit DPDP Act 2023 Consent & PII Anonymization Logs (PRIV-01)",
         desc: "Verify data privacy masking before retraining LLM models.",
+        daysOffset: 14, // Upcoming
+        priority: "MEDIUM",
+        status: "OPEN",
       },
     ];
 
     for (const t of demoTasks) {
       await sequelize.query(
         `INSERT INTO verifywise.tasks (
-           organization_id, title, description, creator_id, is_demo, created_at, updated_at
+           organization_id, title, description, creator_id, due_date, priority, status, is_demo, created_at, updated_at
          )
          VALUES (
-           :orgId, :title, :desc, :userId, false, NOW(), NOW()
+           :orgId, :title, :desc, :userId, (CURRENT_DATE + (:daysOffset || ' days')::INTERVAL), :priority::verifywise.enum_tasks_priority, :status::verifywise.enum_tasks_status, false, NOW(), NOW()
          )`,
         {
           replacements: {
@@ -370,12 +385,15 @@ async function seedBankAIGRCData() {
             title: t.title,
             desc: t.desc,
             userId: primaryUserId,
+            daysOffset: t.daysOffset,
+            priority: t.priority,
+            status: t.status,
           },
           transaction,
         }
       );
     }
-    console.log(`✓ Seeded ${demoTasks.length} Auditor Action Tasks matching exact control names`);
+    console.log(`✓ Seeded ${demoTasks.length} Auditor Action Tasks with active Due Dates & Task Radar support`);
 
     // 8. Seed Model Inventories
     const modelsData = [
