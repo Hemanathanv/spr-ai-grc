@@ -223,14 +223,15 @@ const RegisterUser: React.FC = () => {
           <Typography
             sx={{
               fontSize: 40,
+              fontWeight: "bold",
             }}
           >
-            Verify
-            <span style={{ color: singleTheme.textColors.theme }}>Wise</span>
+            SPR-
+            <span style={{ color: singleTheme.textColors.theme }}>AI_GRC</span>
           </Typography>
           {isInvitationValid === true ? (
             <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
-              Create VerifyWise user account
+              Create SPR-AI_GRC user account
             </Typography>
           ) : (
             <Typography

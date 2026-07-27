@@ -364,10 +364,11 @@ const Login: React.FC = () => {
           <Typography
             sx={{
               fontSize: 40,
+              fontWeight: "bold",
             }}
           >
-            Verify
-            <span style={{ color: singleTheme.textColors.theme }}>Wise</span>
+            SPR-
+            <span style={{ color: singleTheme.textColors.theme }}>AI_GRC</span>
           </Typography>
           <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{loginText}</Typography>
           {showSetupBanner && (
@@ -390,7 +391,7 @@ const Login: React.FC = () => {
                   flex: 1,
                 }}
               >
-                Welcome to VerifyWise! To get started, log in with your superadmin credentials to
+                Welcome to SPR-AI_GRC! To get started, log in with your superadmin credentials to
                 create an organization and invite users.
               </Typography>
               <IconButton
