@@ -136,7 +136,7 @@
     "baseline-browser-mapping": "^2.10.38",
     "concurrently": "^9.2.1",
     "dotenv-webpack": "^9.0.0",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.0",
     "msw": "^2.14.6",
     "prettier": "^3.8.4",
     "typescript": "^6.0.3",
