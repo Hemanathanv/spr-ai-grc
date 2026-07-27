@@ -26,19 +26,17 @@ import {
 } from "@mui/material";
 import {
   Search,
-  FileSpreadsheet,
   ShieldCheck,
-  AlertTriangle,
   FileText,
   X,
-  CheckCircle2,
-  Clock,
   ExternalLink,
-  Download,
   Filter,
+  CheckCircle2,
+  Lock,
+  Zap,
 } from "lucide-react";
 import bankControlsData from "../../../../../shared/bank_controls_extracted.json";
-import { brand, status as statusPalette, border as borderPalette, background, text as textColors } from "../../themes/palette";
+import { brand, status as statusPalette, border as borderPalette, background, text as textColors, risk as riskPalette } from "../../themes/palette";
 
 export interface BankControl {
   track: string;
@@ -61,38 +59,26 @@ export interface BankControl {
   wp_ref: string;
 }
 
-const TRACKS = [
-  "Summary Dashboard",
-  "AI Governance Control Testing",
-  "AI Security, Governance & Ops",
-  "Regulatory Compilance",
+// Seamless App-aligned navigation tabs
+const NAV_TABS = [
+  { id: "audit-dashboard", label: "📊 Audit Dashboard" },
+  { id: "risk-controls", label: "⚖️ AI Risk & Control Testing" },
+  { id: "security-ops", label: "🛡️ AI Security & Guardrails" },
+  { id: "framework-compliance", label: "📜 Framework Compliance" },
 ];
 
-const getRiskColor = (rating: string) => {
+const getRiskStyle = (rating: string) => {
   switch (rating?.toLowerCase()) {
     case "critical":
+      return riskPalette.critical;
     case "high":
-      return statusPalette.error.text;
+      return riskPalette.high;
     case "medium":
-      return statusPalette.warning.text;
+      return riskPalette.medium;
     case "low":
-      return statusPalette.success.text;
+      return riskPalette.low;
     default:
-      return brand.primary;
-  }
-};
-
-const getRiskBg = (rating: string) => {
-  switch (rating?.toLowerCase()) {
-    case "critical":
-    case "high":
-      return statusPalette.error.bg;
-    case "medium":
-      return statusPalette.warning.bg;
-    case "low":
-      return statusPalette.success.bg;
-    default:
-      return brand.primaryLight;
+      return riskPalette.low;
   }
 };
 
@@ -108,15 +94,17 @@ export const BankChecklistViewer: React.FC = () => {
 
   const allControls = bankControlsData as BankControl[];
 
-  // Filter controls based on tab & filter choices
-  const filteredControls = useMemo(() => {
-    let list = allControls;
+  // Map internal track names to clean tab indices
+  const getControlsForTab = (tabIdx: number) => {
+    if (tabIdx === 1) return allControls.filter((c) => c.track === "AI Governance Control Testing");
+    if (tabIdx === 2) return allControls.filter((c) => c.track === "AI Security, Governance & Ops");
+    if (tabIdx === 3) return allControls.filter((c) => c.track === "Regulatory Compilance");
+    return allControls;
+  };
 
-    // Filter by track tab (Tab 0 is Summary Dashboard)
-    if (activeTab > 0) {
-      const currentTrack = TRACKS[activeTab];
-      list = list.filter((c) => c.track === currentTrack);
-    }
+  // Filter controls based on active tab and user criteria
+  const filteredControls = useMemo(() => {
+    let list = getControlsForTab(activeTab);
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -145,13 +133,13 @@ export const BankChecklistViewer: React.FC = () => {
     return list;
   }, [allControls, activeTab, searchTerm, selectedDomain, selectedRisk, selectedNature]);
 
-  // Unique domains for active track
+  // Unique domains for active tab
   const availableDomains = useMemo(() => {
-    const trackControls = activeTab > 0 ? allControls.filter((c) => c.track === TRACKS[activeTab]) : allControls;
+    const trackControls = getControlsForTab(activeTab);
     return Array.from(new Set(trackControls.map((c) => c.domain))).sort();
   }, [allControls, activeTab]);
 
-  // Statistics for Summary Dashboard
+  // Metrics calculation for Audit Dashboard tab
   const stats = useMemo(() => {
     const total = allControls.length;
     const highCritical = allControls.filter(
@@ -161,62 +149,59 @@ export const BankChecklistViewer: React.FC = () => {
     const detective = allControls.filter((c) => c.control_nature.toLowerCase().includes("detective")).length;
     const corrective = allControls.filter((c) => c.control_nature.toLowerCase().includes("corrective")).length;
 
-    const trackCounts = {
-      gov: allControls.filter((c) => c.track === "AI Governance Control Testing").length,
-      sec: allControls.filter((c) => c.track === "AI Security, Governance & Ops").length,
-      reg: allControls.filter((c) => c.track === "Regulatory Compilance").length,
+    const counts = {
+      riskControls: allControls.filter((c) => c.track === "AI Governance Control Testing").length,
+      securityOps: allControls.filter((c) => c.track === "AI Security, Governance & Ops").length,
+      compliance: allControls.filter((c) => c.track === "Regulatory Compilance").length,
     };
 
-    return { total, highCritical, preventive, detective, corrective, trackCounts };
+    return { total, highCritical, preventive, detective, corrective, counts };
   }, [allControls]);
 
   const handleRemarksChange = (ref: string, val: string) => {
     setAuditorRemarks((prev) => ({ ...prev, [ref]: val }));
   };
 
-  const handleStatusChange = (ref: string, val: string) => {
-    setControlStatuses((prev) => ({ ...prev, [ref]: val }));
-  };
-
   return (
     <Box sx={{ width: "100%", p: 3, background: background.main, minHeight: "100vh" }}>
-      {/* Header Banner */}
+      {/* Native App Header Banner */}
       <Paper
         elevation={0}
         sx={{
           p: 3,
           mb: 3,
-          borderRadius: 2,
+          borderRadius: "4px",
           border: `1px solid ${borderPalette.dark}`,
-          background: `linear-gradient(135deg, ${brand.primary}15 0%, ${background.gradientStop} 100%)`,
+          background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
         }}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack spacing={0.5}>
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <ShieldCheck size={28} color={brand.primary} />
+              <ShieldCheck size={26} color={brand.primary} />
               <Typography variant="h5" sx={{ fontWeight: 700, color: textColors.primary }}>
-                ABCBank AI-GRC Master Audit Checklist
+                SPR-AI_GRC Enterprise Audit & Controls Platform
               </Typography>
             </Stack>
             <Typography variant="body2" sx={{ color: textColors.secondary }}>
-              Comprehensive 145+ Controls Audit Working Papers & Regulatory Assurance Matrix (RBI FREE-AI, CERT-In, SEBI CSCRF, DPDP Act 2023, OWASP LLM 2025)
+              Continuous Control Assurance, Risk Testing & Regulatory Audit Working Papers (RBI FREE-AI, CERT-In, SEBI CSCRF, DPDP Act 2023, OWASP LLM 2025)
             </Typography>
           </Stack>
           <Chip
-            icon={<FileSpreadsheet size={16} />}
-            label="4-Sheet Excel Baseline Loaded"
+            icon={<Lock size={14} color={brand.primary} />}
+            label="BFSI AI-GRC Audit Assurance Engine"
             sx={{
               backgroundColor: brand.primaryLight,
               color: brand.primary,
               fontWeight: 600,
+              borderRadius: "4px",
               px: 1,
             }}
           />
         </Stack>
       </Paper>
 
-      {/* Track Tabs */}
+      {/* Navigation Tabs - Clean & Native */}
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs
           value={activeTab}
@@ -229,29 +214,36 @@ export const BankChecklistViewer: React.FC = () => {
               textTransform: "none",
               fontWeight: 600,
               fontSize: "0.95rem",
-              minHeight: 48,
+              minHeight: 44,
             },
             "& .Mui-selected": {
               color: brand.primary,
             },
           }}
         >
-          <Tab label="📊 1. Summary Dashboard" />
-          <Tab label={`⚖️ 2. AI Governance Control Testing (${stats.trackCounts.gov})`} />
-          <Tab label={`🛡️ 3. AI Security, Governance & Ops (${stats.trackCounts.sec})`} />
-          <Tab label={`📜 4. Regulatory Compliance (${stats.trackCounts.reg})`} />
+          <Tab label="📊 Audit Dashboard" />
+          <Tab label={`⚖️ AI Risk & Control Testing (${stats.counts.riskControls})`} />
+          <Tab label={`🛡️ AI Security & Guardrails (${stats.counts.securityOps})`} />
+          <Tab label={`📜 Framework Compliance (${stats.counts.compliance})`} />
         </Tabs>
       </Box>
 
-      {/* Tab 0: Summary Dashboard */}
+      {/* Tab 0: Audit Dashboard */}
       {activeTab === 0 && (
         <Stack spacing={3}>
-          {/* Executive Stat Cards */}
+          {/* Executive Dashboard Cards matching native app styling */}
           <Grid container spacing={2.5}>
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ border: `1px solid ${borderPalette.dark}`, borderRadius: 2 }}>
-                <CardContent>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 600 }}>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                }}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
                     TOTAL AUDIT CONTROLS
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 800, color: brand.primary, my: 1 }}>
@@ -265,12 +257,19 @@ export const BankChecklistViewer: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ border: `1px solid ${borderPalette.dark}`, borderRadius: 2 }}>
-                <CardContent>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 600 }}>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                }}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
                     HIGH & CRITICAL RISK CONTROLS
                   </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 800, color: statusPalette.error.text, my: 1 }}>
+                  <Typography variant="h3" sx={{ fontWeight: 800, color: riskPalette.critical.text, my: 1 }}>
                     {stats.highCritical}
                   </Typography>
                   <Typography variant="caption" sx={{ color: textColors.secondary }}>
@@ -281,17 +280,24 @@ export const BankChecklistViewer: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ border: `1px solid ${borderPalette.dark}`, borderRadius: 2 }}>
-                <CardContent>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 600 }}>
-                    CONTROL NATURE RATIO
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                }}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
+                    CONTROL NATURE BREAKDOWN
                   </Typography>
                   <Stack spacing={0.5} sx={{ mt: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      Preventive: {stats.preventive} | Detective: {stats.detective}
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: textColors.primary }}>
+                      Preventive: <b>{stats.preventive}</b> | Detective: <b>{stats.detective}</b>
                     </Typography>
                     <Typography variant="caption" sx={{ color: textColors.secondary }}>
-                      Corrective: {stats.corrective}
+                      Corrective: <b>{stats.corrective}</b>
                     </Typography>
                   </Stack>
                 </CardContent>
@@ -299,10 +305,17 @@ export const BankChecklistViewer: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ border: `1px solid ${borderPalette.dark}`, borderRadius: 2 }}>
-                <CardContent>
-                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 600 }}>
-                    BANK COMPLIANCE ASSURANCE
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                }}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Typography variant="caption" sx={{ color: textColors.secondary, fontWeight: 700, letterSpacing: 0.5 }}>
+                    AUDIT COMPLIANCE ASSURANCE
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 800, color: statusPalette.success.text, my: 1 }}>
                     94.2%
@@ -317,73 +330,103 @@ export const BankChecklistViewer: React.FC = () => {
             </Grid>
           </Grid>
 
-          {/* Track Breakdowns */}
+          {/* Core Feature Area Cards */}
           <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2.5, borderRadius: 2, border: `1px solid ${borderPalette.dark}` }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
-                  Sheet 2: AI Governance Control Testing
-                </Typography>
-                <Typography variant="body2" sx={{ color: textColors.secondary, mb: 2 }}>
-                  79 controls covering Fairness, Transparency, Accountability, Data Privacy, AIBOM, and Lifecycle Model Risk.
-                </Typography>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => setActiveTab(1)}
-                  sx={{ textTransform: "none", fontWeight: 600 }}
-                >
-                  View 79 Controls →
-                </Button>
-              </Paper>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                  height: "100%",
+                }}
+              >
+                <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: textColors.primary }}>
+                    AI Risk & Control Testing
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: textColors.secondary, mb: 3, flexGrow: 1 }}>
+                    79 controls covering Fairness, Transparency, Explainability, Accountability, Data Privacy & AIBOM Lineage.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setActiveTab(1)}
+                    sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
+                  >
+                    Explore Controls ({stats.counts.riskControls}) →
+                  </Button>
+                </CardContent>
+              </Card>
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2.5, borderRadius: 2, border: `1px solid ${borderPalette.dark}` }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
-                  Sheet 3: AI Security, Governance & Ops
-                </Typography>
-                <Typography variant="body2" sx={{ color: textColors.secondary, mb: 2 }}>
-                  49 controls covering OWASP LLM 2025, AI Firewalls, SIEM Threat Intel, Hallucinations, & Quantum-Safe Tech.
-                </Typography>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => setActiveTab(2)}
-                  sx={{ textTransform: "none", fontWeight: 600 }}
-                >
-                  View 49 Controls →
-                </Button>
-              </Paper>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                  height: "100%",
+                }}
+              >
+                <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: textColors.primary }}>
+                    AI Security & Guardrails
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: textColors.secondary, mb: 3, flexGrow: 1 }}>
+                    49 controls covering OWASP LLM 2025, AI Gateways, SIEM Threat Intel, Output Hallucinations & Quantum-Safe Encryption.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setActiveTab(2)}
+                    sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
+                  >
+                    Explore Controls ({stats.counts.securityOps}) →
+                  </Button>
+                </CardContent>
+              </Card>
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2.5, borderRadius: 2, border: `1px solid ${borderPalette.dark}` }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
-                  Sheet 4: Regulatory Compliance
-                </Typography>
-                <Typography variant="body2" sx={{ color: textColors.secondary, mb: 2 }}>
-                  17 controls covering RBI FREE-AI, CERT-In Blueprint CIGU-2026-0002, SEBI CSCRF, DPDP 2023, & IndiaAI Mission.
-                </Typography>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => setActiveTab(3)}
-                  sx={{ textTransform: "none", fontWeight: 600 }}
-                >
-                  View 17 Regulatory Controls →
-                </Button>
-              </Paper>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${borderPalette.dark}`,
+                  borderRadius: "4px",
+                  background: `linear-gradient(135deg, ${background.main} 0%, ${background.gradientStop} 100%)`,
+                  height: "100%",
+                }}
+              >
+                <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: textColors.primary }}>
+                    Framework Compliance
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: textColors.secondary, mb: 3, flexGrow: 1 }}>
+                    17 controls covering RBI FREE-AI, CERT-In Blueprint CIGU-2026-0002, SEBI CSCRF, DPDP Act 2023 & IndiaAI Mission.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setActiveTab(3)}
+                    sx={{ textTransform: "none", fontWeight: 600, borderColor: borderPalette.dark, color: brand.primary }}
+                  >
+                    Explore Controls ({stats.counts.compliance}) →
+                  </Button>
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </Stack>
       )}
 
-      {/* Tabs 1, 2, 3: Controls Tables */}
+      {/* Tabs 1, 2, 3: Filterable Controls Tables */}
       {activeTab > 0 && (
-        <Stack spacing= {2.5}>
-          {/* Filters Bar */}
-          <Paper sx={{ p: 2, borderRadius: 2, border: `1px solid ${borderPalette.dark}` }}>
+        <Stack spacing={2.5}>
+          {/* Native Filters Bar */}
+          <Paper elevation={0} sx={{ p: 2, borderRadius: "4px", border: `1px solid ${borderPalette.dark}`, background: background.main }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={4}>
                 <TextField
@@ -458,7 +501,7 @@ export const BankChecklistViewer: React.FC = () => {
           </Paper>
 
           {/* Controls Table */}
-          <TableContainer component={Paper} sx={{ borderRadius: 2, border: `1px solid ${borderPalette.dark}` }}>
+          <TableContainer component={Paper} elevation={0} sx={{ borderRadius: "4px", border: `1px solid ${borderPalette.dark}` }}>
             <Table size="small">
               <TableHead sx={{ backgroundColor: background.gradientStop }}>
                 <TableRow>
@@ -475,6 +518,7 @@ export const BankChecklistViewer: React.FC = () => {
               </TableHead>
               <TableBody>
                 {filteredControls.map((c) => {
+                  const riskStyle = getRiskStyle(c.risk_rating);
                   const currentStatus = controlStatuses[c.ctrl_ref] || c.status || "Compliant";
                   return (
                     <TableRow
@@ -501,10 +545,12 @@ export const BankChecklistViewer: React.FC = () => {
                           label={c.risk_rating}
                           size="small"
                           sx={{
-                            backgroundColor: getRiskBg(c.risk_rating),
-                            color: getRiskColor(c.risk_rating),
+                            backgroundColor: riskStyle.bg,
+                            color: riskStyle.text,
+                            border: `1px solid ${riskStyle.border}`,
                             fontWeight: 700,
                             fontSize: "0.75rem",
+                            borderRadius: "4px",
                           }}
                         />
                       </TableCell>
@@ -516,7 +562,7 @@ export const BankChecklistViewer: React.FC = () => {
                           size="small"
                           color={currentStatus === "Compliant" ? "success" : "warning"}
                           variant="outlined"
-                          sx={{ fontWeight: 600, fontSize: "0.75rem" }}
+                          sx={{ fontWeight: 600, fontSize: "0.75rem", borderRadius: "4px" }}
                         />
                       </TableCell>
                       <TableCell textAlign="center">
@@ -550,13 +596,15 @@ export const BankChecklistViewer: React.FC = () => {
             <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
               <Stack spacing={0.5}>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <Chip label={selectedControl.wp_ref} color="primary" sx={{ fontWeight: 700, fontFamily: "monospace" }} />
+                  <Chip label={selectedControl.wp_ref} color="primary" sx={{ fontWeight: 700, fontFamily: "monospace", borderRadius: "4px" }} />
                   <Chip
                     label={selectedControl.risk_rating}
                     sx={{
-                      backgroundColor: getRiskBg(selectedControl.risk_rating),
-                      color: getRiskColor(selectedControl.risk_rating),
+                      backgroundColor: getRiskStyle(selectedControl.risk_rating).bg,
+                      color: getRiskStyle(selectedControl.risk_rating).text,
+                      border: `1px solid ${getRiskStyle(selectedControl.risk_rating).border}`,
                       fontWeight: 700,
+                      borderRadius: "4px",
                     }}
                   />
                 </Stack>
@@ -575,7 +623,7 @@ export const BankChecklistViewer: React.FC = () => {
             <Box sx={{ borderBottom: 1, borderColor: "divider" }} />
 
             {/* Objective & Description */}
-            <Paper sx={{ p: 2, background: "#f8fafc", borderRadius: 2 }}>
+            <Paper elevation={0} sx={{ p: 2, background: "#f8fafc", borderRadius: "4px", border: `1px solid ${borderPalette.dark}` }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5, color: brand.primary }}>
                 Control Description
               </Typography>
@@ -589,7 +637,7 @@ export const BankChecklistViewer: React.FC = () => {
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
                 🔍 Detailed Audit Test Procedure
               </Typography>
-              <Paper sx={{ p: 2, border: `1px solid ${borderPalette.dark}`, borderRadius: 2 }}>
+              <Paper elevation={0} sx={{ p: 2, border: `1px solid ${borderPalette.dark}`, borderRadius: "4px" }}>
                 <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
                   {selectedControl.test_procedure || "Review documented evidence against model specification."}
                 </Typography>
@@ -602,7 +650,7 @@ export const BankChecklistViewer: React.FC = () => {
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
                   📁 Evidence to be Obtained
                 </Typography>
-                <Paper sx={{ p: 1.5, border: `1px solid ${borderPalette.dark}`, borderRadius: 2, minHeight: 90 }}>
+                <Paper elevation={0} sx={{ p: 1.5, border: `1px solid ${borderPalette.dark}`, borderRadius: "4px", minHeight: 90 }}>
                   <Typography variant="caption" sx={{ color: textColors.primary }}>
                     {selectedControl.evidence || "Validation report; testing logs; approvals."}
                   </Typography>
@@ -613,7 +661,7 @@ export const BankChecklistViewer: React.FC = () => {
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
                   📊 Sample Size & Testing Approach
                 </Typography>
-                <Paper sx={{ p: 1.5, border: `1px solid ${borderPalette.dark}`, borderRadius: 2, minHeight: 90 }}>
+                <Paper elevation={0} sx={{ p: 1.5, border: `1px solid ${borderPalette.dark}`, borderRadius: "4px", minHeight: 90 }}>
                   <Typography variant="caption" sx={{ color: textColors.primary }}>
                     {selectedControl.sample_size || "100% of high-risk models; sample of medium-risk."}
                   </Typography>
@@ -626,7 +674,7 @@ export const BankChecklistViewer: React.FC = () => {
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
                 ✅ Acceptance / Pass-Fail Criteria
               </Typography>
-              <Paper sx={{ p: 1.5, background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 2 }}>
+              <Paper elevation={0} sx={{ p: 1.5, background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "4px" }}>
                 <Typography variant="caption" sx={{ color: "#166534" }}>
                   {selectedControl.pass_fail || "Control operating effectively if documented evidence confirms activity was performed and approved within defined timelines."}
                 </Typography>
