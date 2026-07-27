@@ -33,7 +33,7 @@ def upgrade() -> None:
     # 1. ORGANIZATIONS TABLE (org_id is VARCHAR for eval-specific orgs)
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_organizations (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_organizations (
             id VARCHAR(255) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             description TEXT,
@@ -52,7 +52,7 @@ def upgrade() -> None:
     # 2. ORG MEMBERS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_org_members (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_org_members (
             org_id VARCHAR(255) NOT NULL REFERENCES verifywise.llm_evals_organizations(id) ON DELETE CASCADE,
             user_id INTEGER NOT NULL REFERENCES verifywise.users(id) ON DELETE CASCADE,
             role VARCHAR(50) DEFAULT 'member',
@@ -74,7 +74,7 @@ def upgrade() -> None:
     # 3. API KEYS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_api_keys (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_api_keys (
             id SERIAL PRIMARY KEY,
             provider VARCHAR(50) NOT NULL,
             api_key_encrypted TEXT NOT NULL,
@@ -94,7 +94,7 @@ def upgrade() -> None:
     # 4. PROJECTS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_projects (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_projects (
             id VARCHAR(255) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             description TEXT,
@@ -118,7 +118,7 @@ def upgrade() -> None:
     # 5. DATASETS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_datasets (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_datasets (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             path TEXT NOT NULL,
@@ -141,7 +141,7 @@ def upgrade() -> None:
     # 6. SCORERS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_scorers (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_scorers (
             id VARCHAR(255) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             description TEXT,
@@ -166,7 +166,7 @@ def upgrade() -> None:
     # 7. MODELS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_models (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_models (
             id VARCHAR(255) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             provider VARCHAR(100),
@@ -187,7 +187,7 @@ def upgrade() -> None:
     # 8. EXPERIMENTS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_experiments (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_experiments (
             id VARCHAR(255) PRIMARY KEY,
             project_id VARCHAR(255) NOT NULL REFERENCES verifywise.llm_evals_projects(id) ON DELETE CASCADE,
             name VARCHAR(255) NOT NULL,
@@ -222,7 +222,7 @@ def upgrade() -> None:
     # 9. ARENA COMPARISONS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_arena_comparisons (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_arena_comparisons (
             id VARCHAR(255) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             description TEXT,
@@ -256,7 +256,7 @@ def upgrade() -> None:
     # 10. BIAS AUDITS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_bias_audits (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_bias_audits (
             id VARCHAR(255) PRIMARY KEY,
             project_id VARCHAR(255),
             preset_id VARCHAR(100) NOT NULL,
@@ -286,7 +286,7 @@ def upgrade() -> None:
     # 11. LOGS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_logs (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_logs (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             project_id VARCHAR(255) NOT NULL REFERENCES verifywise.llm_evals_projects(id) ON DELETE CASCADE,
             experiment_id VARCHAR(255) REFERENCES verifywise.llm_evals_experiments(id) ON DELETE CASCADE,
@@ -328,7 +328,7 @@ def upgrade() -> None:
     # 12. METRICS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_metrics (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_metrics (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             project_id VARCHAR(255) NOT NULL REFERENCES verifywise.llm_evals_projects(id) ON DELETE CASCADE,
             experiment_id VARCHAR(255) REFERENCES verifywise.llm_evals_experiments(id) ON DELETE CASCADE,
@@ -357,7 +357,7 @@ def upgrade() -> None:
     # 13. BIAS AUDIT RESULTS TABLE
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.llm_evals_bias_audit_results (
+        CREATE TABLE IF NOT EXISTS verifywise.llm_evals_bias_audit_results (
             id SERIAL PRIMARY KEY,
             audit_id VARCHAR(255) NOT NULL REFERENCES verifywise.llm_evals_bias_audits(id) ON DELETE CASCADE,
             category_type VARCHAR(100) NOT NULL,
@@ -385,7 +385,7 @@ def upgrade() -> None:
     # 14. MIGRATION STATUS TABLE (for tracking data migration)
     # ============================================================
     op.execute(sa.text('''
-        CREATE TABLE verifywise.evalserver_migration_status (
+        CREATE TABLE IF NOT EXISTS verifywise.evalserver_migration_status (
             migration_key VARCHAR(255) PRIMARY KEY,
             status VARCHAR(50) NOT NULL,
             organizations_migrated INTEGER DEFAULT 0,
@@ -401,7 +401,7 @@ def upgrade() -> None:
         );
     '''))
 
-    print("✓ Created all shared-schema tables in verifywise schema")
+    print("Created all shared-schema tables in verifywise schema")
 
 
 def downgrade() -> None:
