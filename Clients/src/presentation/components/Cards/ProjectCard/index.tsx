@@ -270,6 +270,7 @@ export const ProjectCard = React.memo(function ProjectCard({
               </Link>
             </Stack>
           </Stack>
+        </Stack>
       </Stack>
       {/* View Project Details Button */}
       <Stack direction="row" sx={{ mt: 0, mb: 0, justifyContent: "flex-end", gap: 1 }}>
