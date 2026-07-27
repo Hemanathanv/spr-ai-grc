@@ -14,8 +14,10 @@ ansible/secrets.yml
 *.cert
 *.p12
 *.pfx
-*.jks
-
+*.xlsx
+**/*.xlsx
+*.xls
+**/*.xls
 # -------------------- Dependencies --------------------
 node_modules/
 **/node_modules/
