@@ -18,6 +18,8 @@ import {
   Network,
   Database,
   Rocket,
+  ShieldCheck,
+  FileSpreadsheet,
   // Workflow,
   // Sparkles,
 } from "lucide-react";
@@ -154,6 +156,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       name: "ASSURANCE",
       items: [
+        {
+          id: "bank-checklist",
+          label: "Bank AI Audit Checklist",
+          icon: <ShieldCheck size={16} strokeWidth={1.5} />,
+          path: "/bank-checklist",
+        },
         {
           id: "risk-management",
           label: "Risk management",

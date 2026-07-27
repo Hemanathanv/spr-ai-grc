@@ -59,6 +59,7 @@ const Tasks = lazyRoute(() => import("../../presentation/pages/Tasks"));
 const AutomationsPage = lazyRoute(() => import("../../presentation/pages/Automations"));
 const ApprovalWorkflows = lazyRoute(() => import("../../presentation/pages/ApprovalWorkflows"));
 const IncidentManagement = lazyRoute(() => import("../../presentation/pages/IncidentManagement"));
+const BankChecklist = lazyRoute(() => import("../../presentation/components/BankChecklistViewer"));
 
 // ── AI feature routes ─────────────────────────────────────────────────
 const EvalsDashboard = lazyRoute(
@@ -350,6 +351,22 @@ export const createRoutes = (
       element={
         <Suspense fallback={<LazyFallback />}>
           <Reporting />
+        </Suspense>
+      }
+    />
+    <Route
+      path="/bank-checklist"
+      element={
+        <Suspense fallback={<LazyFallback />}>
+          <BankChecklist />
+        </Suspense>
+      }
+    />
+    <Route
+      path="/compliance-tracker"
+      element={
+        <Suspense fallback={<LazyFallback />}>
+          <BankChecklist />
         </Suspense>
       }
     />
