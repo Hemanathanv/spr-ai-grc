@@ -1,0 +1,156 @@
+# ============================================================
+# VerifyWise — .gitignore
+# ============================================================
+
+# -------------------- Environment & Secrets --------------------
+.env
+.env.*
+!.env.example
+!.env.*.example
+!ansible/templates/.env.j2
+ansible/secrets.yml
+*.key
+*.pem
+*.cert
+*.p12
+*.pfx
+*.jks
+
+# -------------------- Dependencies --------------------
+node_modules/
+**/node_modules/
+
+# Yarn / PnP
+.pnp/
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+
+# -------------------- Python --------------------
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.graphify_python
+
+# Python virtual environments
+venv/
+.venv/
+**/venv/
+**/.venv/
+env/
+ENV/
+
+# -------------------- Build Outputs --------------------
+dist/
+build/
+**/dist/
+**/build/
+Clients/dist/
+Servers/dist/
+Servers/build/
+AIGateway/dist/
+EvalServer/dist/
+*.tsbuildinfo
+
+# -------------------- Logs --------------------
+*.log
+logs/
+express.log
+fastapi.log
+react.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -------------------- Test & Coverage --------------------
+coverage/
+**/coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.coverage.*
+*.lcov
+
+# -------------------- OS --------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+._*
+
+# -------------------- IDE / Editor --------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# -------------------- Claude Code / AI Tooling --------------------
+.claude/launch.json
+.claude/settings.local.json
+.claude/worktrees/
+.claude/todos/
+.claude/tasks/
+.claude/teams/
+.claude/scheduled-tasks/
+.omc/
+graphify-out/
+
+# AI agent temp files
+agent.md
+agent-output.md
+agent-plan.md
+plan.md
+.kombai
+
+# -------------------- Docker --------------------
+docker-compose.override.yml
+*.override.yml
+
+# -------------------- Database --------------------
+.db_initialized
+*.sqlite
+*.sqlite3
+*.db
+.history
+
+# -------------------- Uploads & Generated --------------------
+Gateway/data/config.json
+Gateway/data/config.json.bak
+
+# EvalServer user uploads (keep directory structure, ignore uploaded files)
+EvaluationModule/data/uploads/*
+!EvaluationModule/data/uploads/.gitkeep
+
+videos/
+screenshots/
+.webreel/
+pdf-templates/
+
+# -------------------- Kubernetes Secrets --------------------
+kubernetes/*/secrets.env
+kubernetes/*/secrets.yaml
+
+# -------------------- Docs --------------------
+docs/api-docs/dist
+
+# -------------------- Misc --------------------
+nul
+*.tgz
+*.tar.gz
+*.zip
+.dfmt/
+ansible/inventory.ini

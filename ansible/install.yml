@@ -1,0 +1,80 @@
+---
+- name: Install VerifyWise on a new server
+  hosts: verifywise
+  become: true
+
+  tasks:
+    - name: Generate random secrets for this run
+      ansible.builtin.set_fact:
+        db_password: "{{ lookup('password', '/dev/null length=24 chars=ascii_letters,digits') }}"
+        superadmin_password: "{{ lookup('password', '/dev/null length=20 chars=ascii_letters,digits') }}"
+        jwt_secret: "{{ lookup('password', '/dev/null length=64 chars=hexdigits') }}"
+        refresh_token_secret: "{{ lookup('password', '/dev/null length=64 chars=hexdigits') }}"
+        encryption_key: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+        ai_gateway_internal_key: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+
+    - name: Install curl
+      ansible.builtin.apt:
+        name: curl
+        state: present
+        update_cache: true
+
+    - name: Install Docker via official script
+      ansible.builtin.shell: curl -fsSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Detect available Compose command (v2 plugin or legacy binary)
+      ansible.builtin.shell: |
+        if docker compose version >/dev/null 2>&1; then
+          echo "docker compose"
+        elif command -v docker-compose >/dev/null 2>&1; then
+          echo "docker-compose"
+        else
+          echo "MISSING"
+          exit 1
+        fi
+      register: compose_detect
+      changed_when: false
+
+    - name: Set compose_cmd fact
+      ansible.builtin.set_fact:
+        compose_cmd: "{{ compose_detect.stdout }}"
+
+    - name: Create install directory
+      ansible.builtin.file:
+        path: "{{ install_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy docker-compose files from local repo
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../{{ item }}"
+        dest: "{{ install_dir }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - docker-compose.yml
+        - docker-compose.prod.yml
+
+    - name: Render .env.prod file
+      ansible.builtin.template:
+        src: .env.j2
+        dest: "{{ install_dir }}/.env.prod"
+        mode: "0600"
+
+    - name: Pull images and start the stack
+      ansible.builtin.shell: "{{ compose_cmd }} -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d"
+      args:
+        chdir: "{{ install_dir }}"
+      register: compose_up
+      changed_when: "'Started' in compose_up.stdout or 'Created' in compose_up.stdout"
+
+    - name: Wait for backend health endpoint
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ backend_port }}/health"
+        method: GET
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 24
+      delay: 5

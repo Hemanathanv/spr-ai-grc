@@ -1,0 +1,5 @@
+<svg width="210" height="45" viewBox="0 0 210 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="44.7076" height="44.7076" rx="6.87809" fill="#13715B"/>
+  <path d="M22.1439 36.5253V22.5257L18.4612 24.3489C11.9224 27.6047 7.86388 33.6603 7.86388 40.2368H5.1582V24.2187C5.1582 19.0096 8.61546 14.1911 14.102 11.9121L22.219 8.52617V22.5257L25.9018 20.7025C32.4405 17.4468 36.4991 11.3912 36.4991 4.81467H39.2047V20.8328C39.2047 26.0419 35.7475 30.8604 30.2609 33.1394L22.1439 36.5253Z" fill="white"/>
+  <text x="54" y="32" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#13715B" letter-spacing="0.5">SPR-AI-GRC</text>
+</svg>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Fonts are self-hosted — see src/presentation/styles/fonts.css -->
+
+    <!-- General meta description for SEO -->
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon16x16.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon32x32.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="64x64" href="/favicon64x64.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="128x128" href="/favicon128x128.svg" />
+    <meta
+      name="description"
+      content="SPR-AI-GRC helps you track, audit, and ensure compliance for AI systems with full transparency and responsibility."
+    />
+
+    <!-- Open Graph (Facebook, LinkedIn, etc.) -->
+    <meta
+      property="og:title"
+      content="SPR-AI-GRC - AI Governance, Risk and Compliance Platform"
+    />
+    <meta
+      property="og:description"
+      content="Track, audit, and ensure compliance for AI systems. Built for transparency, trust, and responsibility in AI."
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="SPR-AI-GRC - AI Governance, Risk and Compliance Platform"
+    />
+    <meta
+      name="twitter:description"
+      content="Track, audit, and ensure compliance for AI systems. Built for transparency, trust, and responsibility in AI."
+    />
+
+    <meta name="build-time" content="BUILD_TIME_PLACEHOLDER" />
+    <title>SPR-AI-GRC - AI Governance, Risk and Compliance Platform</title>
+  </head>
+
+  <body>
+    <script>
+      // Apply dark mode before first paint to avoid flash
+      if (localStorage.getItem("vw_dark_mode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    </script>
+    <style>
+      #vw-splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        z-index: 9999;
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      .dark-mode #vw-splash {
+        background: #0f1419;
+      }
+      #vw-splash .vw-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(19, 113, 91, 0.15);
+        border-top-color: #13715b;
+        border-radius: 50%;
+        animation: vw-spin 0.8s linear infinite;
+      }
+      @keyframes vw-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <div id="root">
+      <div id="vw-splash" role="status" aria-live="polite" aria-label="Loading">
+        <div class="vw-spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

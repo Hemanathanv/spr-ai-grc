@@ -1,0 +1,56 @@
+.home-layout {
+  position: relative;
+  height: 100vh;
+  /* Remove fixed max-width, let content area handle constraints */
+  margin: 0;
+  /* Reserve space for the help sidebar on the right */
+  margin-right: var(--help-sidebar-padding, 64px);
+  transition: margin-right 300ms ease-in-out;
+  overflow: hidden;
+}
+
+.home-layout aside {
+  height: 100vh;
+  width: 230px;
+  max-width: 230px;
+  z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.base-Popup-root {
+  z-index: 2;
+}
+
+.home-layout .main-content-area {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.home-layout .scrollable-content {
+  flex: 1;
+  min-height: 0; /* Critical for flex scroll containers */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 24px 8px 24px 24px;
+}
+.home-layout > div:has(> [class*="fallback__"]) .background-pattern-svg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+
+  width: 100%;
+  max-width: 800px;
+  height: 100%;
+  max-height: 800px;
+
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}

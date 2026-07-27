@@ -1,0 +1,18 @@
+FROM node:25-alpine
+
+WORKDIR /app
+
+# Install git for AI detection repository scanning
+RUN apk add --no-cache git
+
+COPY ./package.json ./
+RUN npm install
+
+COPY ./ ./
+COPY ./SQL_Commands.sql ./SQL_Commands.sql
+
+COPY ./templates ./dist/templates
+
+EXPOSE 3000
+
+CMD ["npm", "run", "watch"]

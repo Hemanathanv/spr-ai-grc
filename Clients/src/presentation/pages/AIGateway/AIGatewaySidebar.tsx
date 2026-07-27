@@ -1,0 +1,180 @@
+/**
+ * AI Gateway Sidebar Component
+ *
+ * Sidebar navigation for the AI Gateway module.
+ * Follows the SidebarShell pattern established by ShadowAISidebar.
+ */
+
+import {
+  Router,
+  BarChart3,
+  MessageSquare,
+  ShieldCheck,
+  FileText,
+  Settings,
+  BookOpen,
+  Layers,
+  KeyRound,
+  Server,
+  Wrench,
+  ClipboardList,
+  CheckCircle,
+  Shield,
+  GitBranch,
+} from "lucide-react";
+import SidebarShell, {
+  SidebarMenuItem,
+  SidebarMenuGroup,
+} from "../../components/Sidebar/SidebarShell";
+import { SHOW_AI_GATEWAY_PROMPTS } from "../../../application/config/featureFlags";
+
+interface AIGatewaySidebarProps {
+  activeTab: string;
+  onTabChange: (value: string) => void;
+  endpointsCount?: number;
+  promptsCount?: number;
+  virtualKeysCount?: number;
+}
+
+export default function AIGatewaySidebar({
+  activeTab,
+  onTabChange,
+  endpointsCount = 0,
+  promptsCount = 0,
+}: AIGatewaySidebarProps) {
+  const flatItems: SidebarMenuItem[] = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      value: "dashboard",
+      icon: <BarChart3 size={16} strokeWidth={1.5} />,
+    },
+    {
+      id: "endpoints",
+      label: "Endpoints",
+      value: "endpoints",
+      icon: <Router size={16} strokeWidth={1.5} />,
+      count: endpointsCount,
+    },
+    {
+      id: "playground",
+      label: "Playground",
+      value: "playground",
+      icon: <MessageSquare size={16} strokeWidth={1.5} />,
+    },
+    {
+      id: "guardrails",
+      label: "Guardrails",
+      value: "guardrails",
+      icon: <ShieldCheck size={16} strokeWidth={1.5} />,
+    },
+    // Prompts is gated behind SHOW_AI_GATEWAY_PROMPTS — hidden from the UI
+    // while the page, routes, and backend remain in place.
+    ...(SHOW_AI_GATEWAY_PROMPTS
+      ? [
+          {
+            id: "prompts",
+            label: "Prompts",
+            value: "prompts",
+            icon: <BookOpen size={16} strokeWidth={1.5} />,
+            count: promptsCount,
+          },
+        ]
+      : []),
+    {
+      id: "models",
+      label: "Models",
+      value: "models",
+      icon: <Layers size={16} strokeWidth={1.5} />,
+    },
+    {
+      id: "logs",
+      label: "Logs",
+      value: "logs",
+      icon: <FileText size={16} strokeWidth={1.5} />,
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      value: "settings",
+      icon: <Settings size={16} strokeWidth={1.5} />,
+    },
+  ];
+
+  const mcpGroups: SidebarMenuGroup[] = [
+    {
+      name: "Agent Control",
+      collapsible: false,
+      defaultCollapsed: false,
+      // Order: monitor (Activity) → act (Approvals, Guardrails) → divider →
+      // configure (Agent keys, MCP servers, MCP tools).
+      items: [
+        {
+          id: "mcp-runs",
+          label: "Runs",
+          value: "mcp/runs",
+          icon: <GitBranch size={16} strokeWidth={1.5} />,
+        },
+        {
+          id: "mcp-audit",
+          label: "Activity",
+          value: "mcp/audit",
+          icon: <ClipboardList size={16} strokeWidth={1.5} />,
+        },
+        {
+          id: "mcp-approvals",
+          label: "Approvals",
+          value: "mcp/approvals",
+          icon: <CheckCircle size={16} strokeWidth={1.5} />,
+        },
+        {
+          id: "mcp-guardrails",
+          label: "Guardrails",
+          value: "mcp/guardrails",
+          icon: <Shield size={16} strokeWidth={1.5} />,
+          dividerAfter: true,
+        },
+        {
+          id: "mcp-agent-keys",
+          label: "Agent keys",
+          value: "mcp/agent-keys",
+          icon: <KeyRound size={16} strokeWidth={1.5} />,
+        },
+        {
+          id: "mcp-servers",
+          label: "MCP servers",
+          value: "mcp/servers",
+          icon: <Server size={16} strokeWidth={1.5} />,
+        },
+        {
+          id: "mcp-tools",
+          label: "MCP tools",
+          value: "mcp/tools",
+          icon: <Wrench size={16} strokeWidth={1.5} />,
+        },
+      ],
+    },
+  ];
+
+  const isItemActive = (item: SidebarMenuItem): boolean => {
+    return item.value === activeTab;
+  };
+
+  const handleItemClick = (item: SidebarMenuItem) => {
+    if (item.value) {
+      onTabChange(item.value);
+    }
+  };
+
+  return (
+    <SidebarShell
+      flatItems={flatItems}
+      menuGroups={mcpGroups}
+      recentSections={[]}
+      isItemActive={isItemActive}
+      onItemClick={handleItemClick}
+      showReadyToSubscribe={false}
+      enableFlyingHearts={false}
+    />
+  );
+}

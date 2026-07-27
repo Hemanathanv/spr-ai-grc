@@ -1,0 +1,93 @@
+/* Global thin scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d0d5dd;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #98a2b3;
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d0d5dd transparent;
+}
+
+body {
+  margin: 0;
+}
+
+/* preventing joyride default container from disrupting page layout */
+div.react-joyride {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+div.react-joyride > * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global ripple effect disable for all MUI components */
+.MuiTouchRipple-root {
+  display: none !important;
+}
+
+.MuiButtonBase-root .MuiTouchRipple-root,
+.MuiButton-root .MuiTouchRipple-root,
+.MuiIconButton-root .MuiTouchRipple-root,
+.MuiMenuItem-root .MuiTouchRipple-root,
+.MuiListItemButton-root .MuiTouchRipple-root,
+.MuiTab-root .MuiTouchRipple-root,
+.MuiCheckbox-root .MuiTouchRipple-root,
+.MuiRadio-root .MuiTouchRipple-root,
+.MuiSwitch-root .MuiTouchRipple-root,
+.MuiFab-root .MuiTouchRipple-root,
+.MuiChip-root .MuiTouchRipple-root {
+  display: none !important;
+}
+
+/* Policy editor heading font sizes */
+.slate-h1 {
+  font-size: 18px !important;
+}
+
+.slate-h2 {
+  font-size: 16px !important;
+}
+
+.slate-h3 {
+  font-size: 14px !important;
+}
+
+/* Policy editor link styles */
+.slate-link,
+[data-slate-node="element"][data-slate-type="link"],
+a[data-slate-node="element"] {
+  color: #3182ce !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+.slate-link:hover,
+[data-slate-node="element"][data-slate-type="link"]:hover,
+a[data-slate-node="element"]:hover {
+  color: #2c5aa0 !important;
+  text-decoration: underline !important;
+}

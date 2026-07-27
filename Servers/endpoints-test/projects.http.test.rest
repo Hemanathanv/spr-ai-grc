@@ -1,0 +1,7 @@
+### get all projects
+
+GET http://localhost:3000/api/projects/1
+
+###
+
+GET http://localhost:3000/projects/complainces/1
