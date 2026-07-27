@@ -266,209 +266,118 @@ async function seedBankAIGRCData() {
     }
     console.log(`✓ Ingested ${insertedCount} Controls with Audit Working Papers into Database`);
 
-    // 6. Seed Demo Risk Assessment Entries based on exact control names
+    // 6. Seed Demo Risk Assessment Entries
     const demoRisks = [
       {
-        ref: "RSK-FAIR-01",
-        title: "Disparate Impact & Credit Discrimination Risk (FAIR-01)",
+        name: "Disparate Impact & Credit Discrimination Risk (FAIR-01)",
         desc: "Risk that CreditRisk-XGBoost-v2.1 exhibits demographic bias across protected credit applicant attributes.",
-        likelihood: 2,
-        impact: 4,
-        tier: "High",
-        strategy: "Mitigate",
+        controls: "FAIR-01, FAIR-02, FAIR-03, FAIR-04",
       },
       {
-        ref: "RSK-OWSP-01",
-        title: "Prompt Injection & System Prompt Jailbreak (OWSP-01)",
+        name: "Prompt Injection & System Prompt Jailbreak (OWSP-01)",
         desc: "Vulnerability where adversarial user prompts bypass safety filters in CustomerBot-LLM-v3.0.",
-        likelihood: 3,
-        impact: 5,
-        tier: "Critical",
-        strategy: "Mitigate",
+        controls: "OWSP-01, OWSP-02, GATE-01, GATE-02",
       },
       {
-        ref: "RSK-AIBOM-01",
-        title: "Unverified Model Dependencies & SBOM Vulnerability (AIBOM-01)",
+        name: "Unverified Model Dependencies & SBOM Vulnerability (AIBOM-01)",
         desc: "Risk of unvetted open-source ML packages contaminated with CVE vulnerabilities.",
-        likelihood: 2,
-        impact: 4,
-        tier: "High",
-        strategy: "Mitigate",
+        controls: "AIBOM-01, AIBOM-02, AIBOM-03, AIBOM-04",
       },
       {
-        ref: "RSK-REGF-01",
-        title: "RBI FREE-AI Board Governance Oversight Non-Compliance (REGF-01)",
+        name: "RBI FREE-AI Board Governance Oversight Non-Compliance (REGF-01)",
         desc: "Lack of quarterly Board Risk Committee sign-off on AI/ML risk exposure limits.",
-        likelihood: 2,
-        impact: 4,
-        tier: "High",
-        strategy: "Mitigate",
+        controls: "REGF-01, REGF-02, REGF-03",
       },
       {
-        ref: "RSK-PRIV-01",
-        title: "DPDP Act Customer PII Exposure in Fine-Tuning Data (PRIV-01)",
+        name: "DPDP Act Customer PII Exposure in Fine-Tuning Data (PRIV-01)",
         desc: "Risk of unmasked customer personal identifiers entering training datasets.",
-        likelihood: 2,
-        impact: 5,
-        tier: "Critical",
-        strategy: "Mitigate",
+        controls: "PRIV-01, PRIV-02, PRIV-03, PRIV-04",
       },
       {
-        ref: "RSK-GATE-01",
-        title: "AI Gateway Firewall Bypass & Rate Limit Abuse (GATE-01)",
+        name: "AI Gateway Firewall Bypass & Rate Limit Abuse (GATE-01)",
         desc: "Risk of unauthenticated high-volume API calls exhausting LLM endpoint tokens.",
-        likelihood: 2,
-        impact: 3,
-        tier: "Medium",
-        strategy: "Mitigate",
+        controls: "GATE-01, GATE-02, GATE-03, GATE-04",
       },
       {
-        ref: "RSK-HALU-01",
-        title: "Financial Product Misinformation & Hallucination Risk (HALU-01)",
+        name: "Financial Product Misinformation & Hallucination Risk (HALU-01)",
         desc: "Conversational bot presenting incorrect loan interest rates or bank fee structures.",
-        likelihood: 3,
-        impact: 4,
-        tier: "High",
-        strategy: "Mitigate",
+        controls: "HALU-01, HALU-02, HALU-03, HALU-04",
       },
       {
-        ref: "RSK-QNTM-01",
-        title: "Post-Quantum Cryptographic API Exposure (QNTM-01)",
+        name: "Post-Quantum Cryptographic API Exposure (QNTM-01)",
         desc: "Legacy TLS 1.2 encryption vulnerable to quantum computing decryption.",
-        likelihood: 1,
-        impact: 4,
-        tier: "Medium",
-        strategy: "Accept",
+        controls: "QNTM-01, QNTM-02, QNTM-03, QNTM-04",
       },
     ];
 
-    const mainProjectId = projectMap["UC-BANK-001"] || 1;
     for (const r of demoRisks) {
       await sequelize.query(
         `INSERT INTO verifywise.risks (
-           organization_id, project_id, risk_ref, title, description,
-           likelihood, impact, inherent_score, residual_score, status, risk_tier, treatment_strategy,
-           owner_id, created_at, updated_at
+           organization_id, risk_name, risk_description, controls_mapping, risk_owner, is_demo, created_at, updated_at
          )
          VALUES (
-           :orgId, :pId, :ref, :title, :desc,
-           :l, :i, :score, :resScore, 'Open', :tier, :strategy,
-           :userId, NOW(), NOW()
-         )
-         ON CONFLICT DO NOTHING`,
+           :orgId, :name, :desc, :controls, :userId, false, NOW(), NOW()
+         )`,
         {
           replacements: {
             orgId,
-            pId: mainProjectId,
-            ref: r.ref,
-            title: r.title,
+            name: r.name,
             desc: r.desc,
-            l: r.likelihood,
-            i: r.impact,
-            score: r.likelihood * r.impact,
-            resScore: Math.max(1, r.likelihood * r.impact - 4),
-            tier: r.tier,
-            strategy: r.strategy,
+            controls: r.controls,
             userId: primaryUserId,
           },
           transaction,
         }
       );
     }
-    console.log(`✓ Seeded ${demoRisks.length} Risk Assessment items linked to exact control references`);
+    console.log(`✓ Seeded ${demoRisks.length} Risk Assessment entries matching exact control references`);
 
     // 7. Seed Demo Tasks based on control names
     const demoTasks = [
       {
         title: "Complete Pre-Deployment Bias Audit Sign-Off for CreditRisk-XGBoost-v2.1 (FAIR-01)",
         desc: "Perform disparate impact ratio calculations across protected customer attributes.",
-        priority: "high",
-        status: "open",
       },
       {
         title: "Verify AI Gateway Input/Output Filter Rules for CustomerBot-LLM-v3.0 (GATE-01)",
         desc: "Ensure prompt regex filters and PII redactors are active on port 8000.",
-        priority: "critical",
-        status: "open",
       },
       {
         title: "Conduct OWASP LLM 2025 Penetration Test on SOC-AnomalyDetector-v4.0 (OWSP-01)",
         desc: "Test for indirect prompt injection and model denial of service.",
-        priority: "high",
-        status: "open",
       },
       {
         title: "Submit RBI FREE-AI Board Compliance Sign-Off Briefing Note (REGF-01)",
         desc: "Prepare quarterly AI Governance summary report for the Board Risk Committee.",
-        priority: "high",
-        status: "open",
       },
       {
         title: "Audit DPDP Act 2023 Consent & PII Anonymization Logs (PRIV-01)",
         desc: "Verify data privacy masking before retraining LLM models.",
-        priority: "medium",
-        status: "open",
       },
     ];
 
     for (const t of demoTasks) {
       await sequelize.query(
         `INSERT INTO verifywise.tasks (
-           organization_id, project_id, title, description, priority, status, created_by, assigned_to, created_at, updated_at
+           organization_id, title, description, creator_id, is_demo, created_at, updated_at
          )
          VALUES (
-           :orgId, :pId, :title, :desc, :priority, :status, :userId, :userId, NOW(), NOW()
-         )
-         ON CONFLICT DO NOTHING`,
+           :orgId, :title, :desc, :userId, false, NOW(), NOW()
+         )`,
         {
           replacements: {
             orgId,
-            pId: mainProjectId,
             title: t.title,
             desc: t.desc,
-            priority: t.priority,
-            status: t.status,
             userId: primaryUserId,
           },
           transaction,
         }
       );
     }
-    console.log(`✓ Seeded ${demoTasks.length} Auditor Action Tasks linked to exact control names`);
+    console.log(`✓ Seeded ${demoTasks.length} Auditor Action Tasks matching exact control names`);
 
-    // 8. Seed Audit Evidences
-    const demoEvidences = [
-      { name: "WP-FAIR-01-2026_PreDeployment_Bias_Test_Report.pdf", path: "/uploads/evidence/WP-FAIR-01-2026.pdf", size: 2450000 },
-      { name: "WP-OWSP-01-2026_Prompt_Jailbreak_PenTest_Results.pdf", path: "/uploads/evidence/WP-OWSP-01-2026.pdf", size: 1820000 },
-      { name: "WP-AIBOM-01-2026_Model_Lineage_and_SBOM_Attestation.json", path: "/uploads/evidence/WP-AIBOM-01-2026.json", size: 420000 },
-      { name: "WP-REGF-01-2026_RBI_FREE_AI_Board_Approval_Note.pdf", path: "/uploads/evidence/WP-REGF-01-2026.pdf", size: 3100000 },
-      { name: "WP-PRIV-01-2026_DPDP_Data_Protection_Impact_Assessment.pdf", path: "/uploads/evidence/WP-PRIV-01-2026.pdf", size: 2900000 },
-    ];
-
-    for (const ev of demoEvidences) {
-      await sequelize.query(
-        `INSERT INTO verifywise.file_uploads (
-           organization_id, original_name, storage_path, mime_type, file_size, uploaded_by, created_at, updated_at
-         )
-         VALUES (
-           :orgId, :name, :path, 'application/pdf', :size, :userId, NOW(), NOW()
-         )
-         ON CONFLICT DO NOTHING`,
-        {
-          replacements: {
-            orgId,
-            name: ev.name,
-            path: ev.path,
-            size: ev.size,
-            userId: primaryUserId,
-          },
-          transaction,
-        }
-      );
-    }
-    console.log(`✓ Seeded ${demoEvidences.length} Audit Evidence File Attachments`);
-
-    // 9. Seed Model Inventories
+    // 8. Seed Model Inventories
     const modelsData = [
       { name: "CreditRisk-XGBoost-v2.1", tier: "1", provider: "Internal Banking ML Engine", model: "XGBoost Classifier" },
       { name: "FraudNet-BERT-v1.4", tier: "1", provider: "Internal Fraud Intelligence", model: "BERT Transformer" },
@@ -490,7 +399,7 @@ async function seedBankAIGRCData() {
     }
     console.log(`✓ Ingested ${modelsData.length} Model Inventory entries`);
 
-    // 10. Seed Vendors
+    // 9. Seed Vendors
     const vendorsData = [
       { name: "Microsoft Azure AI Services", sensitivity: "Financial data", criticality: "High (critical to core services or products)" },
       { name: "OpenAI Enterprise", sensitivity: "Personally identifiable information (PII)", criticality: "High (critical to core services or products)" },
@@ -517,7 +426,7 @@ async function seedBankAIGRCData() {
 
     await transaction.commit();
     console.log(`\n==================================================`);
-    console.log(`🎉 SUCCESS: Seeded complete demo data for 145+ controls, risks, tasks, & working paper evidences!`);
+    console.log(`🎉 SUCCESS: Seeded complete demo data for 145+ controls, risks, tasks, & model inventories!`);
     console.log(`==================================================\n`);
   } catch (err) {
     await transaction.rollback();
